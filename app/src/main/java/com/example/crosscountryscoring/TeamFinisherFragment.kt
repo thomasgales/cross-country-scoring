@@ -1,5 +1,6 @@
 package com.example.crosscountryscoring
 
+import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,13 +10,20 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.crosscountryscoring.databinding.TeamFinisherFragmentBinding
+import java.lang.ClassCastException
 
 
-class TeamFinisherFragment : Fragment() {
+class TeamFinisherFragment : Fragment(), View.OnClickListener {
 
     companion object {
         fun newInstance() = TeamFinisherFragment()
     }
+
+    interface OnTeamFinisherClickedListener {
+        fun onTeamFinisherClicked()
+    }
+
+    private var listener: OnTeamFinisherClickedListener? = null
 
     private lateinit var viewModel: TeamFinisherViewModel
     private lateinit var recyclerView: RecyclerView
@@ -38,7 +46,7 @@ class TeamFinisherFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(TeamFinisherViewModel::class.java)
 
         viewManager = LinearLayoutManager(activity)
-        viewAdapter = TeamFinisherAdapter(viewModel.fakeTeams)
+        viewAdapter = TeamFinisherAdapter(viewModel.fakeTeams, this)
 
         recyclerView = binding.teamFinisherRecyclerView.apply {
             // use this setting to improve performance if you know that changes
@@ -57,6 +65,18 @@ class TeamFinisherFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as? OnTeamFinisherClickedListener
+        if (listener == null) {
+            throw ClassCastException("$context must implement OnTeamFinisherClickedListener")
+        }
+    }
+
+    override fun onClick(v: View) {
+        listener?.onTeamFinisherClicked()
     }
 
 }

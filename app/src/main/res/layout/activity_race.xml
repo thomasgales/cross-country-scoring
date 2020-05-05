@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <fragment
-        android:name="com.example.crosscountryscoring.TeamFinisherFragment"
-        android:id="@+id/team_finisher_fragment"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.crosscountryscoring.RaceActivityViewModel" />
+    </data>
 
-</LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/currentRunnerTextView"
+            android:text="@{@string/current_race_finisher(Integer.toString(viewModel.currentRaceFinisher))}"
+            android:textStyle="bold"
+            android:textSize="32dp"/>
+
+        <fragment
+            android:name="com.example.crosscountryscoring.TeamFinisherFragment"
+            android:id="@+id/team_finisher_fragment"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+    </LinearLayout>
+</layout>

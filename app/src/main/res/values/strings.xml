@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CrossCountryScoring</string>
+    <string name="current_race_finisher">Current Finisher: %s</string>
 </resources>
