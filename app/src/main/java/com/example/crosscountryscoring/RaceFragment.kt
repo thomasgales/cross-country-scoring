@@ -1,36 +1,28 @@
 package com.example.crosscountryscoring
 
-import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.crosscountryscoring.databinding.TeamFinisherFragmentBinding
-import java.lang.ClassCastException
+import com.example.crosscountryscoring.databinding.FragmentRaceBinding
 
 
-class TeamFinisherFragment : Fragment(), View.OnClickListener {
+class RaceFragment : Fragment() {
 
     companion object {
-        fun newInstance() = TeamFinisherFragment()
+        fun newInstance() = RaceFragment()
     }
 
-    interface OnTeamFinisherClickedListener {
-        fun onTeamFinisherClicked()
-    }
-
-    private var listener: OnTeamFinisherClickedListener? = null
-
-    private lateinit var viewModel: TeamFinisherViewModel
+    private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private var _binding: TeamFinisherFragmentBinding? = null
+    private var _binding: FragmentRaceBinding? = null
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -41,12 +33,14 @@ class TeamFinisherFragment : Fragment(), View.OnClickListener {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        _binding = TeamFinisherFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentRaceBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = this
 
-        viewModel = ViewModelProviders.of(this).get(TeamFinisherViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(RaceViewModel::class.java)
+        binding.viewModel = viewModel
 
         viewManager = LinearLayoutManager(activity)
-        viewAdapter = TeamFinisherAdapter(viewModel.fakeTeams, this)
+        viewAdapter = RaceRecyclerViewAdapter(viewModel.fakeTeams2, viewModel)
 
         recyclerView = binding.teamFinisherRecyclerView.apply {
             // use this setting to improve performance if you know that changes
@@ -65,18 +59,6 @@ class TeamFinisherFragment : Fragment(), View.OnClickListener {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = context as? OnTeamFinisherClickedListener
-        if (listener == null) {
-            throw ClassCastException("$context must implement OnTeamFinisherClickedListener")
-        }
-    }
-
-    override fun onClick(v: View) {
-        listener?.onTeamFinisherClicked()
     }
 
 }
