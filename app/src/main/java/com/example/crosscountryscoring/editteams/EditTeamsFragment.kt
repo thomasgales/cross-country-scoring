@@ -1,28 +1,28 @@
-package com.example.crosscountryscoring
+package com.example.crosscountryscoring.editteams
 
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.crosscountryscoring.databinding.FragmentRaceBinding
+import com.example.crosscountryscoring.R
+import com.example.crosscountryscoring.SharedTeamsViewModel
+import com.example.crosscountryscoring.databinding.FragmentEditTeamsBinding
 import kotlinx.android.synthetic.main.activity_main.*
 
+class EditTeamsFragment : Fragment() {
 
-class RaceFragment : Fragment() {
-
-    private lateinit var viewModel: RaceViewModel
+    private lateinit var viewModel: EditTeamsViewModel
     private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RaceRecyclerViewAdapter
+    private lateinit var viewAdapter: EditTeamsRecyclerViewAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var viewModelFactory: RaceViewModelFactory
     private val sharedVm: SharedTeamsViewModel by activityViewModels()
+    private lateinit var viewModelFactory: EditTeamsViewModelFactory
 
-    private var _binding: FragmentRaceBinding? = null
+    private var _binding: FragmentEditTeamsBinding? = null
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -33,19 +33,20 @@ class RaceFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        _binding = FragmentRaceBinding.inflate(inflater, container, false)
+        _binding = FragmentEditTeamsBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
-        viewModelFactory = RaceViewModelFactory()
-        viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
+        viewModelFactory = EditTeamsViewModelFactory(sharedVm)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(EditTeamsViewModel::class.java)
         binding.viewModel = viewModel
 
         viewManager = LinearLayoutManager(activity)
-        viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, this)
-        sharedVm.teams.observe(viewLifecycleOwner, Observer {
-            viewAdapter.onDatasetChange()
-        })
 
-        recyclerView = binding.raceRecyclerView.apply {
+        viewAdapter =
+            EditTeamsRecyclerViewAdapter(
+                sharedVm.teams.value ?: emptyList()
+            )
+
+        recyclerView = binding.editTeamsRecyclerView.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
@@ -56,6 +57,10 @@ class RaceFragment : Fragment() {
             adapter = viewAdapter
         }
 
+        binding.addTeamButton.setOnClickListener {
+            viewAdapter.addTeam()
+        }
+
         // Indicate that this fragment would like to add items to Options Menu
         setHasOptionsMenu(true)
 
@@ -64,7 +69,7 @@ class RaceFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_main, menu)
+        inflater.inflate(R.menu.edit_teams_menu, menu)
     }
 
     override fun onDestroyView() {
@@ -72,16 +77,15 @@ class RaceFragment : Fragment() {
         _binding = null
     }
 
-    // Item in top bar selected. Act on it!
+    // Button in top bar pressed. Act on it!
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.edit_race_button -> {
-                val action = RaceFragmentDirections.actionRaceFragmentToEditTeamsFragment()
-                NavHostFragment.findNavController(nav_host_fragment).navigate(action)
+            R.id.return_to_race_button -> {
+                viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
+                NavHostFragment.findNavController(nav_host_fragment).popBackStack()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 }

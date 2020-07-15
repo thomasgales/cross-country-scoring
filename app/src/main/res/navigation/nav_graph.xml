@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/raceFragment" >
+    <fragment
+        android:id="@+id/raceFragment"
+        android:name="com.example.crosscountryscoring.RaceFragment"
+        android:label="race_fragment"
+        tools:layout="@layout/fragment_race" >
+        <action
+            android:id="@+id/action_raceFragment_to_editTeamsFragment"
+            app:destination="@id/editTeamsFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/editTeamsFragment"
+        android:name="com.example.crosscountryscoring.editteams.EditTeamsFragment"
+        android:label="edit_teams_fragment"
+        tools:layout="@layout/fragment_edit_teams" />
+</navigation>

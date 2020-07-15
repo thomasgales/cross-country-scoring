@@ -3,21 +3,18 @@
 
     <data>
         <variable
-            name="viewModel"
-            type="com.example.crosscountryscoring.TeamViewModel" />
+            name="team"
+            type="com.example.crosscountryscoring.database.Team" />
     </data>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="100dp">
-
-        <Button
-            android:id="@+id/team_name"
+        <EditText
+            android:id="@+id/team_name_edit_box"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{@string/team_score(viewModel.team.name, viewModel.team.score)}"/>
-
+            android:text="@={team.name}"
+            android:inputType="text"/>
     </LinearLayout>
-
 </layout>

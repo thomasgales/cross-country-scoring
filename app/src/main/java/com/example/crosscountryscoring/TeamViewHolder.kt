@@ -8,13 +8,12 @@ import com.example.crosscountryscoring.databinding.TeamViewBinding
 // Provide a reference to the views for each data item
 // Complex data items may need more than one view per item, and
 // you provide access to all the views for a data item in a view holder.
-class TeamViewHolder(teamViewBinding: TeamViewBinding,
+class TeamViewHolder(private var binding: TeamViewBinding,
                      private val raceRunnerFinished: RaceRecyclerViewAdapter.OnTeamClickedListener) :
-        RecyclerView.ViewHolder(teamViewBinding.root), View.OnClickListener {
+        RecyclerView.ViewHolder(binding.root), View.OnClickListener {
 
-    private var binding: TeamViewBinding = teamViewBinding
     private lateinit var teamViewModel: TeamViewModel
-    var teamBtn : Button = teamViewBinding.teamName
+    var teamBtn : Button = binding.teamName
 
     init {
         teamBtn.setOnClickListener(this)

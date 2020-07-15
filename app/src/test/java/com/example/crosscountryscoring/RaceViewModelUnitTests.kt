@@ -1,47 +1,43 @@
 package com.example.crosscountryscoring
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Local unit test, which will execute on the development machine (host).
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class MainActivityVmUnitTests {
+@RunWith(MockitoJUnitRunner::class)
+class RaceViewModelUnitTests {
 
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
+    @Mock
+    private lateinit var mockTeamVm: ITeamViewModel
+
     @Test
-    fun runnerFinished_IncrementsNumFinished() {
+    fun teamClick_IncrementsRunner() {
+        `when` (mockTeamVm.runnerFinished(1)).thenReturn(true)
         val vm = RaceViewModel()
-        vm.runnerFinished()
-        Assert.assertEquals(2, vm.currentRaceFinisher.value)
+        vm.onTeamClicked(mockTeamVm)
+        // When teamVm returns true, race should iterate current finisher
+        assert(vm.currentRaceFinisher.value == 2)
     }
 
     @Test
-    fun runnerFinished_TeamScoreIncreases() {
-        val vm = TeamViewModel("TestTeam")
-        vm.runnerFinished(5)
-        vm.runnerFinished(6)
-        Assert.assertEquals(11, vm.score)
+    fun teamClick_DoesNotIncrementRunner() {
+        // The 1st runner would always return true- but, to make testing quicker we'll return false.
+        `when` (mockTeamVm.runnerFinished(1)).thenReturn(false)
+        val vm = RaceViewModel()
+        vm.onTeamClicked(mockTeamVm)
+        // When teamVm returns true, race should iterate current finisher
+        assert(vm.currentRaceFinisher.value == 1)
     }
-
-    @Test
-    fun teamScore_StopsIncreasingAfter5() {
-        val vm = TeamViewModel("TestTeam")
-        vm.runnerFinished(1)
-        vm.runnerFinished(2)
-        vm.runnerFinished(3)
-        vm.runnerFinished(4)
-        vm.runnerFinished(5)
-        vm.runnerFinished(6)
-        vm.runnerFinished(7)
-        vm.runnerFinished(8)
-        Assert.assertEquals(15, vm.score)
-    }
-
 }
