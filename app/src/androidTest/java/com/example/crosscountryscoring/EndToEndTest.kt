@@ -1,5 +1,7 @@
 package com.example.crosscountryscoring
 
+import android.app.PendingIntent.getActivity
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
@@ -50,6 +52,88 @@ class EndToEndTest {
     }
 
     @Test
+    fun raceFinisherCount_RestoredAfterOnCreate() {
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        activityScenario.scenario.recreate()
+        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
+            ViewAssertions.matches(
+                ViewMatchers.withText(StringContains.containsString("Current Finisher: 2"))
+            )
+        )
+    }
+
+    @Test
+    fun teamScore_RestoredAfterOnCreate() {
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        activityScenario.scenario.recreate()
+        // Assert Team score restored
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
+            ViewAssertions.matches(
+                Utils.atPosition(
+                    0,
+                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 1"))
+                )
+            )
+        )
+    }
+
+    // FIXME after ActivityScenario.recreate(), databinding to currentRunnerTextView freezes. This
+    //  is only the case while in instrumented test. Can't figure out why, so for now going to
+    //  indirectly test via team score.
+    @Test
+    fun teamFinisherCount_RestoredAfterOnCreate() {
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        activityScenario.scenario.recreate()
+        // Make sure Team # of finishers restored
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        // If Team didn't know the pre-recreate # of finishers, it would increase score past 15
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
+            ViewAssertions.matches(
+                Utils.atPosition(
+                    0,
+                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 15"))
+                )
+            )
+        )
+    }
+
+    @Test
     fun teamButtons_IterateFinisherCount() {
         onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
@@ -95,10 +179,9 @@ class EndToEndTest {
     }
 
     @Test
-    fun currentFinisher_StopIncreasingAfter7() {
-        val startingFinisher =
-            onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+    fun currentFinisher_StopsIncreasingAfter7() {
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
                     ViewActions.click()
                 ))
         onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(

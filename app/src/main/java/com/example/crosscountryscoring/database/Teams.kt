@@ -24,5 +24,5 @@ data class TeamWithRunners(
         parentColumn = "teamId",
         entityColumn = "teamMembershipId"
     )
-    val runners: List<Runner>
+    val runners: MutableList<Runner>
 )

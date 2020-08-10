@@ -2,6 +2,7 @@ package com.example.crosscountryscoring
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.crosscountryscoring.database.Team
+import com.example.crosscountryscoring.database.TeamWithRunners
 import com.example.crosscountryscoring.database.TeamsDaoStub
 import org.junit.Assert
 import org.junit.Before
@@ -12,13 +13,14 @@ class TeamViewModelUnitTests {
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var penn: Team
+    private lateinit var penn: TeamWithRunners
     private lateinit var daoStub: TeamsDaoStub
     private lateinit var vm: TeamViewModel
 
     @Before
     fun setup() {
-        penn = Team("Penn")
+        val team = Team("Penn")
+        penn = TeamWithRunners(team, mutableListOf())
         daoStub = TeamsDaoStub()
         vm = TeamViewModel(penn, daoStub)
     }
@@ -27,7 +29,7 @@ class TeamViewModelUnitTests {
     fun runnerFinished_TeamScoreIncreases() {
         vm.runnerFinished(5)
         vm.runnerFinished(6)
-        Assert.assertEquals(11, penn.score)
+        Assert.assertEquals(11, penn.team.score)
     }
 
     @Test
@@ -40,7 +42,7 @@ class TeamViewModelUnitTests {
         vm.runnerFinished(6)
         vm.runnerFinished(7)
         vm.runnerFinished(8)
-        Assert.assertEquals(15, penn.score)
+        Assert.assertEquals(15, penn.team.score)
     }
 
     @Test

@@ -1,8 +1,9 @@
-package com.example.crosscountryscoring
+package com.example.crosscountryscoring.scoring
 
 import android.view.View
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
+import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.databinding.TeamViewBinding
 
 // Provide a reference to the views for each data item

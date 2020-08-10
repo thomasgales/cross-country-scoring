@@ -1,10 +1,12 @@
-package com.example.crosscountryscoring
+package com.example.crosscountryscoring.scoring
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.example.crosscountryscoring.ITeamViewModel
+import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.databinding.TeamViewBinding
 
 class RaceRecyclerViewAdapter(private val myTeams: LiveData<List<TeamViewModel>>,

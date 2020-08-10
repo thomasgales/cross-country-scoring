@@ -7,12 +7,18 @@ interface TeamsDao: ITeamsDao {
     @Query("SELECT teamId FROM teams")
     fun getAllTeams(): List<Long>
 
+    @Transaction
+    @Query("SELECT * FROM teams WHERE teamId = :teamId")
+    fun getRunners(teamId: Long): TeamWithRunners
+
     @Query("SELECT * FROM teams WHERE teamId = :teamId")
     override fun getTeam(teamId: Long): Team
 
-    // Be wary of REPLACE strategy
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     override fun addTeam(team: Team): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    override fun addRunner(runner: Runner): Long
 
     @Update
     override fun updateTeam(team: Team)

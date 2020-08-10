@@ -7,7 +7,7 @@
     app:startDestination="@id/raceFragment" >
     <fragment
         android:id="@+id/raceFragment"
-        android:name="com.example.crosscountryscoring.RaceFragment"
+        android:name="com.example.crosscountryscoring.scoring.RaceFragment"
         android:label="race_fragment"
         tools:layout="@layout/fragment_race" >
         <action

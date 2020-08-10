@@ -4,7 +4,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.example.crosscountryscoring.RaceViewModel" />
+            type="com.example.crosscountryscoring.scoring.RaceViewModel" />
     </data>
 
     <LinearLayout
@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:id="@+id/currentRunnerTextView"
-            android:text="@{@string/current_race_finisher(Integer.toString(viewModel.currentRaceFinisher))}"
+            android:text="@{@string/current_race_finisher(Integer.toString(viewModel.race.numberFinishedRunners + 1))}"
             android:textStyle="bold"
             android:textSize="32dp"/>
 

@@ -1,6 +1,10 @@
 package com.example.crosscountryscoring
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.crosscountryscoring.database.Race
+import com.example.crosscountryscoring.database.RacesDao
+import com.example.crosscountryscoring.scoring.OnRunnerFinishedListener
+import com.example.crosscountryscoring.scoring.RaceViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,22 +26,30 @@ class RaceViewModelUnitTests {
     @Mock
     private lateinit var mockTeamVm: ITeamViewModel
 
+    @Mock
+    private lateinit var mockRacesDao: RacesDao
+
+    @Mock
+    private lateinit var runnerFinishedListener: OnRunnerFinishedListener
+
     @Test
     fun teamClick_IncrementsRunner() {
         `when` (mockTeamVm.runnerFinished(1)).thenReturn(true)
-        val vm = RaceViewModel()
+        val race = Race("Penn")
+        val vm = RaceViewModel(race, mockRacesDao, runnerFinishedListener)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns true, race should iterate current finisher
-        assert(vm.currentRaceFinisher.value == 2)
+        assert(vm.race.value!!.numberFinishedRunners == 1)
     }
 
     @Test
     fun teamClick_DoesNotIncrementRunner() {
         // The 1st runner would always return true- but, to make testing quicker we'll return false.
         `when` (mockTeamVm.runnerFinished(1)).thenReturn(false)
-        val vm = RaceViewModel()
+        val race = Race("Penn")
+        val vm = RaceViewModel(race, mockRacesDao, runnerFinishedListener)
         vm.onTeamClicked(mockTeamVm)
-        // When teamVm returns true, race should iterate current finisher
-        assert(vm.currentRaceFinisher.value == 1)
+        // When teamVm returns false, race should NOT iterate current finisher
+        assert(vm.race.value!!.numberFinishedRunners == 0)
     }
 }

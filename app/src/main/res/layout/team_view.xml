@@ -16,7 +16,7 @@
             android:id="@+id/team_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{@string/team_score(viewModel.team.name, viewModel.team.score)}"/>
+            android:text="@{@string/team_score(viewModel.teamWithRunners.team.name, viewModel.teamWithRunners.team.score)}"/>
 
     </LinearLayout>
 

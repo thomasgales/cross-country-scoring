@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.crosscountryscoring.database.ITeamsDao
 import com.example.crosscountryscoring.database.Runner
 import com.example.crosscountryscoring.database.Team
+import com.example.crosscountryscoring.database.TeamWithRunners
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -14,9 +15,9 @@ import kotlinx.coroutines.launch
  *  However, the 6th and 7th runners for a team will still increase the score of other teams. After
  *  the 7th runner, if a team has any more runners finish, they do not factor into any team scores.
  */
-class TeamViewModel(val team: Team, private val teamsDao: ITeamsDao) : ViewModel(), ITeamViewModel {
+class TeamViewModel(val teamWithRunners: TeamWithRunners, private val teamsDao: ITeamsDao) : ViewModel(), ITeamViewModel {
     // List of all runners that have finished for this team, up to 7.
-    private var finishers: MutableList<Runner> = ArrayList<Runner>()
+//    private var finishers: MutableList<Runner> = ArrayList<Runner>()
 
     /**
      * @return true if adding another finisher to this team could impact other team's scores,
@@ -30,7 +31,7 @@ class TeamViewModel(val team: Team, private val teamsDao: ITeamsDao) : ViewModel
 //    }
 
     fun getFinishers(): List<Runner> {
-        return finishers
+        return teamWithRunners.runners
     }
 
     /**
@@ -40,16 +41,18 @@ class TeamViewModel(val team: Team, private val teamsDao: ITeamsDao) : ViewModel
      * @return: True if runner if one of the first 7 finishers for this team, false otherwise.
      */
     override fun runnerFinished(place: Int): Boolean {
-        if (finishers.count() < 7) {
-            if (finishers.count() < 5) {
-                team.score += place
+        if (teamWithRunners.runners.count() < 7) {
+            if (teamWithRunners.runners.count() < 5) {
+                teamWithRunners.team.score += place
                 viewModelScope.launch(Dispatchers.IO) {
-                    teamsDao.updateTeam(team)
+                    teamsDao.updateTeam(teamWithRunners.team)
                 }
             }
-            finishers.add(
-                Runner(place, team.teamId)
-            )
+            val finisher = Runner(place, teamWithRunners.team.teamId)
+            teamWithRunners.runners.add(finisher)
+            viewModelScope.launch(Dispatchers.IO) {
+                teamsDao.addRunner(finisher)
+            }
             return true
         }
         return false

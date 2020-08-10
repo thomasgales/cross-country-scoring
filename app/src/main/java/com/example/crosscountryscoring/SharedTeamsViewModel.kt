@@ -28,13 +28,10 @@ class SharedTeamsViewModel(application: Application) : AndroidViewModel(applicat
             val savedTeams = teamsDao.getAllTeams()
             // Unable to have DAO return list of LiveData<Team>, so we end up having to query the
             //  DAO again for each actual Team.
-            _teams.postValue(savedTeams.map { TeamViewModel(teamsDao.getTeam(it), teamsDao) })
-        }
-    }
-
-    fun deleteTeams() {
-        viewModelScope.launch(Dispatchers.IO) {
-            teamsDao.deleteTeams()
+            _teams.postValue(savedTeams.map {
+                val team = teamsDao.getRunners(it)
+                TeamViewModel(team, teamsDao)
+            })
         }
     }
 }

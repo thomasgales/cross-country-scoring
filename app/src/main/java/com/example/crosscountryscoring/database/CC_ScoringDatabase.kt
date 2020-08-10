@@ -5,10 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = arrayOf(Team::class), version = 1)
+@Database(entities = [Team::class, Runner::class, Race::class], version = 2)
 abstract class CC_ScoringDatabase : RoomDatabase() {
 
     abstract fun teamsDao(): TeamsDao
+    abstract fun racesDao(): RacesDao
 
     companion object {
         // Singleton. Prevents multiple instances of database opening at the same time.

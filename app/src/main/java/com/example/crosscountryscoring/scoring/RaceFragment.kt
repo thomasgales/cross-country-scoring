@@ -1,4 +1,4 @@
-package com.example.crosscountryscoring
+package com.example.crosscountryscoring.scoring
 
 import android.os.Bundle
 import android.view.*
@@ -6,14 +6,23 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.crosscountryscoring.*
+import com.example.crosscountryscoring.database.CC_ScoringDatabase
+import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.databinding.FragmentRaceBinding
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+interface OnRunnerFinishedListener {
+    fun onRunnerFinished()
+}
 
-class RaceFragment : Fragment() {
+class RaceFragment : Fragment(), OnRunnerFinishedListener {
 
     private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
@@ -25,7 +34,6 @@ class RaceFragment : Fragment() {
     private var _binding: FragmentRaceBinding? = null
     // This property is only valid between onCreateView and
     // onDestroyView.
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,10 +42,23 @@ class RaceFragment : Fragment() {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         _binding = FragmentRaceBinding.inflate(inflater, container, false)
-        binding.lifecycleOwner = this
-        viewModelFactory = RaceViewModelFactory()
+        _binding?.lifecycleOwner = this
+        // We have to grab race from database asynchronously, so pass in null for now
+        val racesDao = activity?.let { CC_ScoringDatabase.getInstance(it).racesDao() }
+        viewModelFactory = RaceViewModelFactory(null, racesDao, this)
         viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
-        binding.viewModel = viewModel
+        _binding?.viewModel = viewModel
+        lifecycleScope.launch(Dispatchers.IO) {
+            // FIXME using hard-coded raceId of 1 for now- need to implement multiple race feature.
+            var race = racesDao?.getRace(1)
+            viewModel.setDatabaseRace(race)
+            // FIXME long-term we want users to add Races. For now add one for them.
+            if (race == null) {
+                racesDao?.addRace(Race("TestRace"))
+                race = racesDao?.getRace(1)
+                viewModel.setDatabaseRace(race)
+            }
+        }
 
         viewManager = LinearLayoutManager(activity)
         viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, this)
@@ -45,7 +66,7 @@ class RaceFragment : Fragment() {
             viewAdapter.onDatasetChange()
         })
 
-        recyclerView = binding.raceRecyclerView.apply {
+        recyclerView = _binding!!.raceRecyclerView.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
@@ -59,17 +80,12 @@ class RaceFragment : Fragment() {
         // Indicate that this fragment would like to add items to Options Menu
         setHasOptionsMenu(true)
 
-        return binding.root
+        return _binding?.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_main, menu)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     // Item in top bar selected. Act on it!
@@ -84,4 +100,7 @@ class RaceFragment : Fragment() {
         }
     }
 
+    override fun onRunnerFinished() {
+        _binding?.invalidateAll()
+    }
 }

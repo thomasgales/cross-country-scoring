@@ -23,6 +23,11 @@ android {
         testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
+    buildFeatures {
+        dataBinding true
+        viewBinding true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -35,14 +40,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-
-    viewBinding {
-        enabled = true
-    }
-
-    dataBinding {
-        enabled = true
     }
 
     testOptions {

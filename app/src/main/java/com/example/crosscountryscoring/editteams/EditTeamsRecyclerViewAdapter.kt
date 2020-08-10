@@ -20,7 +20,7 @@ class EditTeamsRecyclerViewAdapter(databaseTeams: List<TeamViewModel>)
     : RecyclerView.Adapter<EditTeamViewHolder>() {
 
     private val myTeams: MutableList<Pair<Team, ChangeState>> = databaseTeams.map {
-        Pair(it.team, ChangeState.EXISTED)
+        Pair(it.teamWithRunners.team, ChangeState.EXISTED)
     }.toMutableList()
 
     fun addTeam() {
