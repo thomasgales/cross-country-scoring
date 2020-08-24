@@ -5,9 +5,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -40,8 +42,7 @@ class EndToEndTest {
         onView(ViewMatchers.withId(R.id.edit_race_button)).perform(ViewActions.click())
         onView(ViewMatchers.withId(R.id.add_team_button)).perform(ViewActions.click())
         onView(ViewMatchers.withId(R.id.add_team_button)).perform(ViewActions.click())
-        onView(ViewMatchers.withId(R.id.return_to_race_button))
-            .perform(ViewActions.click())
+        onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
     }
 
     @Test
@@ -182,8 +183,8 @@ class EndToEndTest {
     fun currentFinisher_StopsIncreasingAfter7() {
         onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                    ViewActions.click()
-                ))
+                ViewActions.click()
+            ))
         onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
                 ViewActions.click()
@@ -225,12 +226,52 @@ class EndToEndTest {
         onView(ViewMatchers.withId(R.id.edit_teams_recycler_view))
             .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
                 0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
-        onView(ViewMatchers.withId(R.id.return_to_race_button)).perform(ViewActions.click())
+        onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
         onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
             ViewAssertions.matches(
                 Utils.atPosition(
                     0,
                     ViewMatchers.hasDescendant(ViewMatchers.withText("Elkhart Central Score: 0"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun endRace_ClearsScores() {
+        // Start the race
+        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
+        // Increment a couple scores
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
+                ViewActions.click()
+            ))
+        // Pause and end race
+        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(ViewMatchers.withId(R.id.endRaceButton)).perform(click())
+        // Verify scores are cleared
+        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
+            ViewAssertions.matches(
+                ViewMatchers.withText(StringContains.containsString("Current Finisher: 1"))
+            )
+        )
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
+            ViewAssertions.matches(
+                Utils.atPosition(
+                    1,
+                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 0"))
+                )
+            )
+        )
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
+            ViewAssertions.matches(
+                Utils.atPosition(
+                    0,
+                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 0"))
                 )
             )
         )

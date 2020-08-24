@@ -15,6 +15,10 @@ class TeamsDaoStub : ITeamsDao {
         TODO("Not yet implemented")
     }
 
+    override fun clearRunners() {
+        TODO("Not yet implemented")
+    }
+
     override fun getTeam(teamId: Long): Team {
         // savedTeams[teamId] will return null if key not found. This is how Room database will act.
         return savedTeams[teamId] ?: Team(

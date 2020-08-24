@@ -1,16 +1,19 @@
 package com.example.crosscountryscoring.scoring
 
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.crosscountryscoring.*
+import com.example.crosscountryscoring.R
 import com.example.crosscountryscoring.database.CC_ScoringDatabase
 import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.databinding.FragmentRaceBinding
@@ -22,7 +25,7 @@ interface OnRunnerFinishedListener {
     fun onRunnerFinished()
 }
 
-class RaceFragment : Fragment(), OnRunnerFinishedListener {
+class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener {
 
     private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
@@ -30,6 +33,7 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewModelFactory: RaceViewModelFactory
     private val sharedVm: SharedTeamsViewModel by activityViewModels()
+    private var raceRunning: Boolean = false
 
     private var _binding: FragmentRaceBinding? = null
     // This property is only valid between onCreateView and
@@ -45,9 +49,13 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener {
         _binding?.lifecycleOwner = this
         // We have to grab race from database asynchronously, so pass in null for now
         val racesDao = activity?.let { CC_ScoringDatabase.getInstance(it).racesDao() }
-        viewModelFactory = RaceViewModelFactory(null, racesDao, this)
+
+        @Suppress("UNCHECKED_CAST")
+        val teams = sharedVm.teams as LiveData<List<ITeamViewModel>>
+        viewModelFactory = RaceViewModelFactory(null, teams, racesDao, this)
         viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
         _binding?.viewModel = viewModel
+
         lifecycleScope.launch(Dispatchers.IO) {
             // FIXME using hard-coded raceId of 1 for now- need to implement multiple race feature.
             var race = racesDao?.getRace(1)
@@ -80,6 +88,9 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener {
         // Indicate that this fragment would like to add items to Options Menu
         setHasOptionsMenu(true)
 
+        _binding?.toggleRaceStatusButton?.setOnClickListener(this)
+        _binding?.endRaceButton?.setOnClickListener(this)
+
         return _binding?.root
     }
 
@@ -102,5 +113,36 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener {
 
     override fun onRunnerFinished() {
         _binding?.invalidateAll()
+    }
+
+    override fun onClick(v: View) {
+        when (v.id) {
+            R.id.toggleRaceStatusButton -> {
+                if (raceRunning) {
+                    // Stop the race!
+                    _binding?.toggleRaceStatusButton?.text = "Resume"
+                    // FIXME create better color scheme
+                    _binding?.toggleRaceStatusButton?.background?.setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY)
+                    _binding?.endRaceButton?.visibility = View.VISIBLE
+                    raceRunning = false
+                }
+                else {
+                    // Start or resume the race!
+                    _binding?.toggleRaceStatusButton?.text = "Pause"
+                    // FIXME create better color scheme
+                    _binding?.toggleRaceStatusButton?.background?.setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
+                    _binding?.endRaceButton?.visibility = View.GONE
+                    raceRunning = true
+                }
+            }
+            R.id.endRaceButton -> {
+                viewModel.endRace()
+                viewAdapter.onDatasetChange()
+                _binding?.invalidateAll()
+                // Reset buttons
+                _binding?.toggleRaceStatusButton?.text = "Start Race"
+                _binding?.endRaceButton?.visibility = View.GONE
+            }
+        }
     }
 }

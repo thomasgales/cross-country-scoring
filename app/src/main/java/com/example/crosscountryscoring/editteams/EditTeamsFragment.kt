@@ -2,16 +2,15 @@ package com.example.crosscountryscoring.editteams
 
 import android.os.Bundle
 import android.view.*
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.crosscountryscoring.R
 import com.example.crosscountryscoring.SharedTeamsViewModel
 import com.example.crosscountryscoring.databinding.FragmentEditTeamsBinding
-import kotlinx.android.synthetic.main.activity_main.*
 
 class EditTeamsFragment : Fragment() {
 
@@ -41,10 +40,7 @@ class EditTeamsFragment : Fragment() {
 
         viewManager = LinearLayoutManager(activity)
 
-        viewAdapter =
-            EditTeamsRecyclerViewAdapter(
-                sharedVm.teams.value ?: emptyList()
-            )
+        viewAdapter = EditTeamsRecyclerViewAdapter(sharedVm.teams.value ?: emptyList())
 
         recyclerView = binding.editTeamsRecyclerView.apply {
             // use this setting to improve performance if you know that changes
@@ -64,25 +60,21 @@ class EditTeamsFragment : Fragment() {
         // Indicate that this fragment would like to add items to Options Menu
         setHasOptionsMenu(true)
 
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
+            findNavController().navigateUp()
+        }
+        callback.isEnabled = true
+
         return binding.root
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.edit_teams_menu, menu)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     // Button in top bar pressed. Act on it!
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.return_to_race_button -> {
+            android.R.id.home -> {
                 viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
-                NavHostFragment.findNavController(nav_host_fragment).popBackStack()
+                findNavController().navigateUp()
                 true
             }
             else -> super.onOptionsItemSelected(item)

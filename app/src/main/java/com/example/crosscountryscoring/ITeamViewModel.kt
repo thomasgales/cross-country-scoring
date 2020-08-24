@@ -2,6 +2,11 @@ package com.example.crosscountryscoring
 
 interface ITeamViewModel {
     /**
+     * Clears the score and finished runners for the current race.
+     */
+    fun clearScore()
+
+    /**
      * Summary:
      *  This function adds to the team's score (if appropriate) and saves the runner as a finisher
      *  for the team (if appropriate).

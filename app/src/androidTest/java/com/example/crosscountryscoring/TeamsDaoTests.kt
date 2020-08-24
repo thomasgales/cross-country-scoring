@@ -50,6 +50,18 @@ class TeamsDaoTests {
         assert(dbTeamWithRunners.runners[1].place == 3 || dbTeamWithRunners.runners[1].place == 4)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun addAndClearRunners() {
+        val team = Team("Penn")
+        val teamId = teamsDao.addTeam(team)
+        val runner1 = Runner(3, teamId)
+        teamsDao.addRunner(runner1)
+        teamsDao.clearRunners()
+        val dbTeamWithRunners = teamsDao.getRunners(teamId)
+        assert(dbTeamWithRunners.runners.isEmpty())
+    }
+
     /**
      * Tests the abilities to add teams to the database and clear all teams from the database.
      */

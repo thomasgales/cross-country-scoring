@@ -64,4 +64,12 @@ class TeamViewModelUnitTests {
         vm.runnerFinished(5)
         assert(vm.getFinishers()[0].place == 5)
     }
+
+    @Test
+    fun clearScore_ClearsScoreAndRunners() {
+        vm.runnerFinished(2)
+        vm.clearScore()
+        assert(vm.getFinishers().isEmpty())
+        assert(vm.teamWithRunners.team.score == 0)
+    }
 }

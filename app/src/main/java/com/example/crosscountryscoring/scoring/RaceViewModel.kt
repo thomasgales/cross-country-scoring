@@ -2,22 +2,44 @@ package com.example.crosscountryscoring.scoring
 
 import androidx.lifecycle.*
 import com.example.crosscountryscoring.ITeamViewModel
+import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Business logic for a Race. This class will guarantee that currentRaceFinisher.value will never
- *  be null.
+ * Business logic for a Race.
+ * @param databaseRace: race retrieved from the database.
+ * @param myTeams: list of view models for teams in the race.
+ * @param racesDao: Dao for making changes to the race in the database.
+ * @param runnerFinishedListener: object that cares if a runner finishes.
  */
 class RaceViewModel(databaseRace: Race?,
+                    private val myTeams: LiveData<List<ITeamViewModel>>,
                     private val racesDao: RacesDao?,
                     private val runnerFinishedListener: OnRunnerFinishedListener)
         : ViewModel(), RaceRecyclerViewAdapter.OnTeamClickedListener {
 
     private var race_ : MutableLiveData<Race?> = MutableLiveData(databaseRace)
     var race: LiveData<Race?> = race_; private set
+
+    /**
+     * Ends the race. For now, simply resets all scores.
+     */
+    fun endRace() {
+        race_.value?.let {
+            it.numberFinishedRunners = 0
+            viewModelScope.launch(Dispatchers.IO) {
+                racesDao?.updateRace(it)
+            }
+        }
+        myTeams.value?.let {
+            for (team in it) {
+                team.clearScore()
+            }
+        }
+    }
 
     fun setDatabaseRace(databaseRace: Race?) {
         race_ = MutableLiveData(databaseRace)

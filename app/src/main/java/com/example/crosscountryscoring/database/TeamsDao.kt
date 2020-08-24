@@ -20,6 +20,9 @@ interface TeamsDao: ITeamsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     override fun addRunner(runner: Runner): Long
 
+    @Query("DELETE FROM Runner")
+    override fun clearRunners()
+
     @Update
     override fun updateTeam(team: Team)
 

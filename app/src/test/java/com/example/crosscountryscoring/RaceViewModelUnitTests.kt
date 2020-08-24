@@ -1,6 +1,7 @@
 package com.example.crosscountryscoring
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.MutableLiveData
 import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
 import com.example.crosscountryscoring.scoring.OnRunnerFinishedListener
@@ -35,8 +36,9 @@ class RaceViewModelUnitTests {
     @Test
     fun teamClick_IncrementsRunner() {
         `when` (mockTeamVm.runnerFinished(1)).thenReturn(true)
+        val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
         val race = Race("Penn")
-        val vm = RaceViewModel(race, mockRacesDao, runnerFinishedListener)
+        val vm = RaceViewModel(race, teams, mockRacesDao, runnerFinishedListener)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns true, race should iterate current finisher
         assert(vm.race.value!!.numberFinishedRunners == 1)
@@ -46,10 +48,21 @@ class RaceViewModelUnitTests {
     fun teamClick_DoesNotIncrementRunner() {
         // The 1st runner would always return true- but, to make testing quicker we'll return false.
         `when` (mockTeamVm.runnerFinished(1)).thenReturn(false)
+        val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
         val race = Race("Penn")
-        val vm = RaceViewModel(race, mockRacesDao, runnerFinishedListener)
+        val vm = RaceViewModel(race, teams, mockRacesDao, runnerFinishedListener)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns false, race should NOT iterate current finisher
+        assert(vm.race.value!!.numberFinishedRunners == 0)
+    }
+
+    @Test
+    fun endRace_ClearsRace() {
+        val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
+        val race = Race("Penn")
+        val vm = RaceViewModel(race, teams, mockRacesDao, runnerFinishedListener)
+        vm.onTeamClicked(mockTeamVm)
+        vm.endRace()
         assert(vm.race.value!!.numberFinishedRunners == 0)
     }
 }

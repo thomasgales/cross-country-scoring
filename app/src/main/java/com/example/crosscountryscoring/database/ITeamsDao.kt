@@ -14,6 +14,11 @@ interface ITeamsDao {
     fun addTeam(team: Team): Long
 
     /**
+     * Clears all finished runners from the database.
+     */
+    fun clearRunners()
+
+    /**
      * Returns the team with a matching teamId (if it exists).
      */
     fun getTeam(teamId: Long): Team

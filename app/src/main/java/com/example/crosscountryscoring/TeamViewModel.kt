@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.crosscountryscoring.database.ITeamsDao
 import com.example.crosscountryscoring.database.Runner
-import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.database.TeamWithRunners
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,8 +15,6 @@ import kotlinx.coroutines.launch
  *  the 7th runner, if a team has any more runners finish, they do not factor into any team scores.
  */
 class TeamViewModel(val teamWithRunners: TeamWithRunners, private val teamsDao: ITeamsDao) : ViewModel(), ITeamViewModel {
-    // List of all runners that have finished for this team, up to 7.
-//    private var finishers: MutableList<Runner> = ArrayList<Runner>()
 
     /**
      * @return true if adding another finisher to this team could impact other team's scores,
@@ -29,6 +26,18 @@ class TeamViewModel(val teamWithRunners: TeamWithRunners, private val teamsDao: 
 //        }
 //        return false
 //    }
+
+    /**
+     * Clears the score and finished runners for the current race.
+     */
+    override fun clearScore() {
+        teamWithRunners.team.score = 0
+        teamWithRunners.runners.clear()
+        viewModelScope.launch(Dispatchers.IO) {
+            teamsDao.updateTeam(teamWithRunners.team)
+            teamsDao.clearRunners()
+        }
+    }
 
     fun getFinishers(): List<Runner> {
         return teamWithRunners.runners
