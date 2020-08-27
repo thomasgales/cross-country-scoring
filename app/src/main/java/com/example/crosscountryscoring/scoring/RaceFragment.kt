@@ -39,6 +39,39 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
     // This property is only valid between onCreateView and
     // onDestroyView.
 
+    /**
+     * Displays an AlertDialog with the message and options specified.
+     * @see https://developer.android.com/guide/topics/ui/dialogs.html
+     */
+    private fun askForConfirmation(message: String,
+                                   positiveOption: String,
+                                   positiveCallback: () -> Unit,
+                                   negativeOption: String,
+                                   negativeCallback: () -> Unit ) {
+        val alertDialog: AlertDialog? = activity?.let {
+            val builder = AlertDialog.Builder(it)
+            builder.apply {
+                setPositiveButton(positiveOption, DialogInterface.OnClickListener { dialog, id -> positiveCallback()})
+                setNegativeButton(negativeOption, DialogInterface.OnClickListener { dialog, id -> negativeCallback()})
+            }
+            builder?.setMessage(message)
+            builder.create()
+        }
+        alertDialog?.show()
+    }
+
+    /**
+     * Ends the race. Clears all scores and finishers.
+     */
+    private fun endRace() {
+        viewModel.endRace()
+        viewAdapter.onDatasetChange()
+        _binding?.invalidateAll()
+        // Reset buttons
+        _binding?.toggleRaceStatusButton?.text = "Start Race"
+        _binding?.endRaceButton?.visibility = View.GONE
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -136,12 +169,11 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
                 }
             }
             R.id.endRaceButton -> {
-                viewModel.endRace()
-                viewAdapter.onDatasetChange()
-                _binding?.invalidateAll()
-                // Reset buttons
-                _binding?.toggleRaceStatusButton?.text = "Start Race"
-                _binding?.endRaceButton?.visibility = View.GONE
+                askForConfirmation(getString(R.string.confirm_race_clear),
+                    "End Race",
+                    ::endRace,
+                    "Cancel",
+                    {})
             }
         }
     }

@@ -7,9 +7,10 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -253,6 +254,8 @@ class EndToEndTest {
         // Pause and end race
         onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
         onView(ViewMatchers.withId(R.id.endRaceButton)).perform(click())
+        onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
+        onView(withId(android.R.id.button1)).perform(click())
         // Verify scores are cleared
         onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
             ViewAssertions.matches(
@@ -272,6 +275,48 @@ class EndToEndTest {
                 Utils.atPosition(
                     0,
                     ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 0"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun cancelEndRace_DoesNotClearScores() {
+        // Start the race
+        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
+        // Increment a couple scores
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                ViewActions.click()
+            ))
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
+                ViewActions.click()
+            ))
+        // Pause and end race
+        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(ViewMatchers.withId(R.id.endRaceButton)).perform(click())
+        onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
+        onView(withId(android.R.id.button2)).perform(click())
+        // Verify scores are cleared
+        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
+            ViewAssertions.matches(
+                ViewMatchers.withText(StringContains.containsString("Current Finisher: 3"))
+            )
+        )
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
+            ViewAssertions.matches(
+                Utils.atPosition(
+                    0,
+                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 1"))
+                )
+            )
+        )
+        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
+            ViewAssertions.matches(
+                Utils.atPosition(
+                    1,
+                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 2"))
                 )
             )
         )
