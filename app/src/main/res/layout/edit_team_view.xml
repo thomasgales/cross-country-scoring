@@ -7,14 +7,15 @@
             type="com.example.crosscountryscoring.database.Team" />
     </data>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="100dp"
+        android:orientation="horizontal">
         <EditText
             android:id="@+id/team_name_edit_box"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@={team.name}"
-            android:inputType="text"/>
-    </LinearLayout>
+            android:inputType="text" />
+    </RelativeLayout>
 </layout>

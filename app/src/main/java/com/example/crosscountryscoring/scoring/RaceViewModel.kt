@@ -59,7 +59,7 @@ class RaceViewModel(databaseRace: Race?,
             }
         }
         runnerFinishedListener.onRunnerFinished()
-        return race?.value?.numberFinishedRunners ?: 0
+        return race.value?.numberFinishedRunners ?: 0
     }
 
     /**
@@ -67,7 +67,7 @@ class RaceViewModel(databaseRace: Race?,
      * counter if appropriate.
      */
     override fun onTeamClicked(teamViewModel: ITeamViewModel) {
-        val potentialPlace = race?.value?.numberFinishedRunners?.plus(1) ?: 0
+        val potentialPlace = race.value?.numberFinishedRunners?.plus(1) ?: 0
         if (teamViewModel.runnerFinished(potentialPlace)) {
             runnerFinished()
         }

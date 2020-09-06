@@ -5,12 +5,16 @@ import android.view.*
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.crosscountryscoring.R
 import com.example.crosscountryscoring.SharedTeamsViewModel
 import com.example.crosscountryscoring.databinding.FragmentEditTeamsBinding
+import kotlinx.android.synthetic.main.activity_main.*
 
 class EditTeamsFragment : Fragment() {
 
@@ -36,11 +40,13 @@ class EditTeamsFragment : Fragment() {
         binding.lifecycleOwner = this
         viewModelFactory = EditTeamsViewModelFactory(sharedVm)
         viewModel = ViewModelProvider(this, viewModelFactory).get(EditTeamsViewModel::class.java)
-        binding.viewModel = viewModel
 
         viewManager = LinearLayoutManager(activity)
 
-        viewAdapter = EditTeamsRecyclerViewAdapter(sharedVm.teams.value ?: emptyList())
+        viewAdapter = EditTeamsRecyclerViewAdapter(sharedVm.teams)
+        sharedVm.teams.observe(viewLifecycleOwner, Observer {
+            viewAdapter.onDatasetChange()
+        })
 
         recyclerView = binding.editTeamsRecyclerView.apply {
             // use this setting to improve performance if you know that changes
@@ -69,12 +75,23 @@ class EditTeamsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.edit_teams_menu, menu)
+    }
+
     // Button in top bar pressed. Act on it!
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
                 findNavController().navigateUp()
+                true
+            }
+            R.id.deleteTeamsButton -> {
+                viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
+                val action = EditTeamsFragmentDirections.actionEditFragmentToDeleteTeamsFragment()
+                NavHostFragment.findNavController(nav_host_fragment).navigate(action)
                 true
             }
             else -> super.onOptionsItemSelected(item)

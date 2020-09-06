@@ -27,7 +27,7 @@ interface TeamsDao: ITeamsDao {
     override fun updateTeam(team: Team)
 
     @Delete
-    fun removeTeam(team: Team)
+    fun deleteTeam(team: Team)
 
     @Query("DELETE FROM teams")
     fun deleteTeams()

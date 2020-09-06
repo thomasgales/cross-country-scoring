@@ -1,20 +1,15 @@
 package com.example.crosscountryscoring
 
-import android.app.PendingIntent.getActivity
-import androidx.lifecycle.Lifecycle
+import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
 import org.hamcrest.core.StringContains
 import org.junit.*
 import org.junit.runner.RunWith
@@ -24,9 +19,6 @@ class EndToEndTest {
 
     @get:Rule
     val activityScenario = ActivityScenarioRule(MainActivity::class.java)
-
-//    @get:Rule
-//    var activityRule: ActivityTestRule<MainActivity> = ActivityTestRule(MainActivity::class.java)
 
     companion object {
         @BeforeClass
@@ -40,9 +32,9 @@ class EndToEndTest {
      */
     @Before
     fun addTeams() {
-        onView(ViewMatchers.withId(R.id.edit_race_button)).perform(ViewActions.click())
-        onView(ViewMatchers.withId(R.id.add_team_button)).perform(ViewActions.click())
-        onView(ViewMatchers.withId(R.id.add_team_button)).perform(ViewActions.click())
+        onView(withId(R.id.edit_race_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
         onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
     }
 
@@ -55,31 +47,31 @@ class EndToEndTest {
 
     @Test
     fun raceFinisherCount_RestoredAfterOnCreate() {
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
         activityScenario.scenario.recreate()
-        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(StringContains.containsString("Current Finisher: 2"))
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 2"))
             )
         )
     }
 
     @Test
     fun teamScore_RestoredAfterOnCreate() {
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
         activityScenario.scenario.recreate()
         // Assert Team score restored
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     0,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 1"))
+                    hasDescendant(withText("[Team Name] Score: 1"))
                 )
             )
         )
@@ -90,46 +82,46 @@ class EndToEndTest {
     //  indirectly test via team score.
     @Test
     fun teamFinisherCount_RestoredAfterOnCreate() {
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
         activityScenario.scenario.recreate()
         // Make sure Team # of finishers restored
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
         // If Team didn't know the pre-recreate # of finishers, it would increase score past 15
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     0,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 15"))
+                    hasDescendant(withText("[Team Name] Score: 15"))
                 )
             )
         )
@@ -137,44 +129,44 @@ class EndToEndTest {
 
     @Test
     fun teamButtons_IterateFinisherCount() {
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(StringContains.containsString("Current Finisher: 2"))
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 2"))
             )
         )
     }
 
     @Test
     fun teamButtons_IncreaseScore() {
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     0,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 3"))
+                    hasDescendant(withText("[Team Name] Score: 3"))
                 )
             )
         )
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     1,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 3"))
+                    hasDescendant(withText("[Team Name] Score: 3"))
                 )
             )
         )
@@ -182,57 +174,57 @@ class EndToEndTest {
 
     @Test
     fun currentFinisher_StopsIncreasingAfter7() {
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(StringContains.containsString("Current Finisher: 8"))
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 8"))
             )
         )
     }
 
     @Test
     fun changeTeamName_StaysInRace() {
-        onView(ViewMatchers.withId(R.id.edit_race_button)).perform(ViewActions.click())
-        onView(ViewMatchers.withId(R.id.edit_teams_recycler_view))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
+        onView(withId(R.id.edit_race_button)).perform(click())
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
                 0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
         onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     0,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("Elkhart Central Score: 0"))
+                    hasDescendant(withText("Elkhart Central Score: 0"))
                 )
             )
         )
@@ -241,40 +233,40 @@ class EndToEndTest {
     @Test
     fun endRace_ClearsScores() {
         // Start the race
-        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
         // Increment a couple scores
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
+                click()
             ))
         // Pause and end race
-        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
-        onView(ViewMatchers.withId(R.id.endRaceButton)).perform(click())
+        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(withId(R.id.endRaceButton)).perform(click())
         onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button1)).perform(click())
         // Verify scores are cleared
-        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(StringContains.containsString("Current Finisher: 1"))
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 1"))
             )
         )
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     1,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 0"))
+                    hasDescendant(withText("[Team Name] Score: 0"))
                 )
             )
         )
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     0,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 0"))
+                    hasDescendant(withText("[Team Name] Score: 0"))
                 )
             )
         )
@@ -283,40 +275,166 @@ class EndToEndTest {
     @Test
     fun cancelEndRace_DoesNotClearScores() {
         // Start the race
-        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
         // Increment a couple scores
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
             ))
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
-                ViewActions.click()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
+                click()
             ))
         // Pause and end race
-        onView(ViewMatchers.withId(R.id.toggleRaceStatusButton)).perform(click())
-        onView(ViewMatchers.withId(R.id.endRaceButton)).perform(click())
+        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(withId(R.id.endRaceButton)).perform(click())
         onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button2)).perform(click())
         // Verify scores are cleared
-        onView(ViewMatchers.withId(R.id.currentRunnerTextView)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(StringContains.containsString("Current Finisher: 3"))
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 3"))
             )
         )
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     0,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 1"))
+                    hasDescendant(withText("[Team Name] Score: 1"))
                 )
             )
         )
-        onView(ViewMatchers.withId(R.id.race_recycler_view)).check(
-            ViewAssertions.matches(
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
                 Utils.atPosition(
                     1,
-                    ViewMatchers.hasDescendant(ViewMatchers.withText("[Team Name] Score: 2"))
+                    hasDescendant(withText("[Team Name] Score: 2"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun deleteTeamsScreen_DisplaysCorrectTeams() {
+        onView(withId(R.id.edit_race_button)).perform(click())
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
+        onView(withId(R.id.deleteTeamsButton)).perform(click())
+        onView(withId(R.id.delete_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText("Elkhart Central"))
+                )
+            )
+        )
+        onView(withId(R.id.delete_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    1,
+                    hasDescendant(withText("[Team Name]"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun deleteTeam_DisappearsFromAllScreens() {
+        // Edit team name so we can verify that the correct team was deleted
+        onView(withId(R.id.edit_race_button)).perform(click())
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
+        // Go delete the team
+        onView(withId(R.id.deleteTeamsButton)).perform(click())
+        onView(withId(R.id.delete_teams_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                Utils.clickChildViewWithId(R.id.deleteTeamCheckbox)
+            ))
+        onView(withId(R.id.confirmDeleteTeamsButton)).perform(click())
+        onView(withText(R.string.confirm_delete_teams)).check(matches(isDisplayed()))
+        onView(withId(android.R.id.button1)).perform(click())
+        // Verify team is missing from edit teams fragment
+        onView(withId(R.id.edit_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText("[Team Name]"))
+                )
+            )
+        )
+        // Verify team is missing from race fragment
+        onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
+        val targetContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
+        val scoreString = targetContext.resources.getString(R.string.team_score, "[Team Name]", 0)
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText(scoreString))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun cancelDeleteTeam_DoesNotDeleteTeam() {
+        // Go "delete" the team
+        onView(withId(R.id.edit_race_button)).perform(click())
+        onView(withId(R.id.deleteTeamsButton)).perform(click())
+        onView(withId(R.id.delete_teams_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                Utils.clickChildViewWithId(R.id.deleteTeamCheckbox)
+            ))
+        onView(withId(R.id.confirmDeleteTeamsButton)).perform(click())
+        onView(withText(R.string.confirm_delete_teams)).check(matches(isDisplayed()))
+        // Cancel Deletion
+        onView(withId(android.R.id.button2)).perform(click())
+        // Verify teams still present on edit teams fragment
+        onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
+        onView(withId(R.id.edit_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText("[Team Name]"))
+                )
+            )
+        )
+        onView(withId(R.id.edit_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    1,
+                    hasDescendant(withText("[Team Name]"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun cancelDeleteTeamButton_DoesNotDeleteTeam() {
+        // Go "delete" the team
+        onView(withId(R.id.edit_race_button)).perform(click())
+        onView(withId(R.id.deleteTeamsButton)).perform(click())
+        onView(withId(R.id.delete_teams_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                Utils.clickChildViewWithId(R.id.deleteTeamCheckbox)
+            ))
+        onView(withId(R.id.cancelDeleteTeamsButton)).perform(click())
+        // Verify teams still present on edit teams fragment
+        onView(withId(R.id.edit_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText("[Team Name]"))
+                )
+            )
+        )
+        onView(withId(R.id.edit_teams_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    1,
+                    hasDescendant(withText("[Team Name]"))
                 )
             )
         )

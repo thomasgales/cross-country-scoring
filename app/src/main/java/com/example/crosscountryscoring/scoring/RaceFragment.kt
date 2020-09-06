@@ -51,10 +51,10 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(positiveOption, DialogInterface.OnClickListener { dialog, id -> positiveCallback()})
-                setNegativeButton(negativeOption, DialogInterface.OnClickListener { dialog, id -> negativeCallback()})
+                setPositiveButton(positiveOption, DialogInterface.OnClickListener { _, _ -> positiveCallback()})
+                setNegativeButton(negativeOption, DialogInterface.OnClickListener { _, _ -> negativeCallback()})
             }
-            builder?.setMessage(message)
+            builder.setMessage(message)
             builder.create()
         }
         alertDialog?.show()

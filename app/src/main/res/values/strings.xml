@@ -3,4 +3,7 @@
     <string name="current_race_finisher">Current Finisher: %s</string>
     <string name="team_score">%1$s Score: %2$d</string>
     <string name="confirm_race_clear">Are you sure you want to end the race? This will clear all scores and finishers.</string>
+    <string name="confirm_delete_teams">
+        Are you sure you want to delete these teams? This will not affect any previous scoring.
+    </string>
 </resources>

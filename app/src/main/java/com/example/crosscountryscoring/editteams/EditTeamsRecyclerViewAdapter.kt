@@ -2,13 +2,14 @@ package com.example.crosscountryscoring.editteams
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.databinding.EditTeamViewBinding
 
 enum class ChangeState {
-    EXISTED, ADDED, REMOVED
+    EXISTED, ADDED
 }
 
 /*
@@ -16,12 +17,12 @@ enum class ChangeState {
  * snapshot of the current teams as a MutableList. The user is then free to make changes and save
  * the changes to the database when finished.
  */
-class EditTeamsRecyclerViewAdapter(databaseTeams: List<TeamViewModel>)
+class EditTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<TeamViewModel>>)
     : RecyclerView.Adapter<EditTeamViewHolder>() {
 
-    private val myTeams: MutableList<Pair<Team, ChangeState>> = databaseTeams.map {
+    private var myTeams: MutableList<Pair<Team, ChangeState>> = databaseTeams.value?.map {
         Pair(it.teamWithRunners.team, ChangeState.EXISTED)
-    }.toMutableList()
+    }?.toMutableList() ?: mutableListOf()
 
     fun addTeam() {
         val team = Team("[Team Name]")
@@ -32,12 +33,17 @@ class EditTeamsRecyclerViewAdapter(databaseTeams: List<TeamViewModel>)
         notifyItemInserted(myTeams.size)
     }
 
+    fun onDatasetChange() {
+        myTeams = databaseTeams.value?.map {
+            Pair(it.teamWithRunners.team, ChangeState.EXISTED)
+        }?.toMutableList() ?: mutableListOf()
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EditTeamViewHolder {
         val layoutInflater: LayoutInflater = LayoutInflater.from(parent.context)
         val teamEditViewBinding: EditTeamViewBinding = EditTeamViewBinding.inflate(layoutInflater, parent, false)
-        return EditTeamViewHolder(
-            teamEditViewBinding
-        )
+        return EditTeamViewHolder(teamEditViewBinding)
     }
 
     override fun getItemCount(): Int {

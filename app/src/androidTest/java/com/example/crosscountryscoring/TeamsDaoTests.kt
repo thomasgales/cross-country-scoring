@@ -8,6 +8,8 @@ import com.example.crosscountryscoring.database.CC_ScoringDatabase
 import com.example.crosscountryscoring.database.Runner
 import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.database.TeamsDao
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -46,8 +48,8 @@ class TeamsDaoTests {
         teamsDao.addRunner(runner1)
         teamsDao.addRunner(runner2)
         val dbTeamWithRunners = teamsDao.getRunners(teamId)
-        assert(dbTeamWithRunners.runners[0].place == 3 || dbTeamWithRunners.runners[0].place == 4)
-        assert(dbTeamWithRunners.runners[1].place == 3 || dbTeamWithRunners.runners[1].place == 4)
+        assertTrue(dbTeamWithRunners.runners[0].place == 3 || dbTeamWithRunners.runners[0].place == 4)
+        assertTrue(dbTeamWithRunners.runners[1].place == 3 || dbTeamWithRunners.runners[1].place == 4)
     }
 
     @Test
@@ -59,7 +61,7 @@ class TeamsDaoTests {
         teamsDao.addRunner(runner1)
         teamsDao.clearRunners()
         val dbTeamWithRunners = teamsDao.getRunners(teamId)
-        assert(dbTeamWithRunners.runners.isEmpty())
+        assertTrue(dbTeamWithRunners.runners.isEmpty())
     }
 
     /**
@@ -74,7 +76,7 @@ class TeamsDaoTests {
         }
         teamsDao.deleteTeams()
         val dbTeams = teamsDao.getAllTeams()
-        assert(dbTeams.isEmpty())
+        assertTrue(dbTeams.isEmpty())
     }
 
     /**
@@ -87,8 +89,14 @@ class TeamsDaoTests {
         for (team in teams) {
             teamsDao.addTeam(team)
         }
-        val dbTeams = teamsDao.getAllTeams()
-        assert(teams == dbTeams)
+        val dbTeamIds = teamsDao.getAllTeams()
+        assertEquals(teams.size, dbTeamIds.size)
+        val dbTeams = mutableListOf<Team>()
+        for (teamID in dbTeamIds) {
+            val dbTeam = teamsDao.getTeam(teamID)
+            dbTeams.add(dbTeam)
+        }
+        assertEquals(teams, dbTeams)
     }
 
     /**
@@ -107,6 +115,22 @@ class TeamsDaoTests {
         teamToChange.score = 44
         teamsDao.updateTeam(teamToChange)
         val dbTeam = teamsDao.getTeam(teamId)
-        assert(teamToChange == dbTeam)
+        assertEquals(teamToChange, dbTeam)
+    }
+
+    /**
+     * Tests adding teams and then deleting a specific team.
+     */
+    @Test
+    @Throws(Exception::class)
+    fun addAndDeleteTeam() {
+        val teams = listOf<Team>(Team("Penn"), Team("Glenn"))
+        val deletedTeamId = teamsDao.addTeam(teams[0])
+        teamsDao.addTeam(teams[1])
+        val deletedTeam = teamsDao.getTeam(deletedTeamId)
+        teamsDao.deleteTeam(deletedTeam)
+        val dbTeams = teamsDao.getAllTeams()
+        assertEquals(1, dbTeams.size)
+        assertEquals(dbTeams[0], 2)
     }
 }
