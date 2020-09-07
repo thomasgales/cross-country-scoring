@@ -4,6 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/edit_race_button"
-        android:title="Edit"
+        android:title="@string/edit_race"
+        android:icon="@drawable/baseline_create_24"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/end_race_button"
+        android:title="@string/end_race"
+        app:showAsAction="never"/>
 </menu>
