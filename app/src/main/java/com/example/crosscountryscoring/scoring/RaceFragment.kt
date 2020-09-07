@@ -76,14 +76,8 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         _binding?.invalidateAll()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
-        _binding = FragmentRaceBinding.inflate(inflater, container, false)
-        _binding?.lifecycleOwner = viewLifecycleOwner
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         // We have to grab race from database asynchronously, so pass in null for now
         val racesDao = activity?.let { CC_ScoringDatabase.getInstance(it).racesDao() }
 
@@ -91,9 +85,6 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         val teams = sharedVm.teams as LiveData<List<ITeamViewModel>>
         viewModelFactory = RaceViewModelFactory(null, teams, racesDao, this)
         viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
-        _binding?.viewModel = viewModel
-        timer = CountUpTimer(this)
-        _binding?.timeElapsed = timeElapsed
 
         lifecycleScope.launch(Dispatchers.IO) {
             // FIXME using hard-coded raceId of 1 for now- need to implement multiple race feature.
@@ -106,6 +97,21 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
                 viewModel.setDatabaseRace(race)
             }
         }
+
+        timer = CountUpTimer(this)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        _binding = FragmentRaceBinding.inflate(inflater, container, false)
+        _binding?.lifecycleOwner = viewLifecycleOwner
+
+        _binding?.viewModel = viewModel
+        _binding?.timeElapsed = timeElapsed
 
         viewManager = LinearLayoutManager(activity)
         viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, this)
