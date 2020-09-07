@@ -19,6 +19,7 @@
             android:id="@+id/deleteTeamCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:buttonTint="@color/colorPrimaryDark"
             android:checked="@{delete == DeleteState.DELETE ? true : false}"/>
         <EditText
             android:id="@+id/team_name_edit_box"

@@ -2,9 +2,14 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
+        <import type="androidx.lifecycle.LiveData" />
+        <import type="android.view.View" />
         <variable
             name="viewModel"
             type="com.example.crosscountryscoring.scoring.RaceViewModel" />
+        <variable
+            name="timeElapsed"
+            type="LiveData&lt;String>" />
     </data>
 
     <RelativeLayout
@@ -14,13 +19,24 @@
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:id="@+id/currentRunnerTextView"
             android:text="@{@string/current_race_finisher(Integer.toString(viewModel.race.numberFinishedRunners + 1))}"
             android:textStyle="bold"
-            android:textSize="32dp"
+            android:textSize="24sp"
             android:layout_alignParentTop="true"
             android:layout_margin="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/raceTimerTextView"
+            android:text="@{timeElapsed}"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="8dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/race_recycler_view"
@@ -28,28 +44,18 @@
             android:layout_width="match_parent"
             android:scrollbars="vertical"
             android:layout_below="@id/currentRunnerTextView"
+            android:layout_above="@id/startRaceButton"
             android:layout_margin="8dp"/>
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:id="@+id/toggleRaceStatusButton"
-            android:text="Start Race"
-            android:background="@android:color/holo_green_dark"
+            android:id="@+id/startRaceButton"
+            android:text="@string/start_race"
+            android:textStyle="bold"
+            android:background="@color/colorAccent"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="8dp"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:id="@+id/endRaceButton"
-            android:text="End Race"
-            android:background="@android:color/holo_red_dark"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_margin="8dp"
-            android:visibility="gone"/>
+            android:visibility="@{viewModel.raceRunning ? View.GONE : View.VISIBLE}"/>
 
     </RelativeLayout>
 </layout>

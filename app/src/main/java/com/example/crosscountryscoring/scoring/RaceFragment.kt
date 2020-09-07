@@ -1,11 +1,9 @@
 package com.example.crosscountryscoring.scoring
 
-import android.app.AlertDialog
 import android.content.DialogInterface
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*
@@ -25,7 +23,11 @@ interface OnRunnerFinishedListener {
     fun onRunnerFinished()
 }
 
-class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener {
+interface TimerChangedListener {
+    fun timerChanged(newTime: String)
+}
+
+class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener, TimerChangedListener {
 
     private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
@@ -33,7 +35,10 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewModelFactory: RaceViewModelFactory
     private val sharedVm: SharedTeamsViewModel by activityViewModels()
-    private var raceRunning: Boolean = false
+    private lateinit var timer: CountUpTimer
+
+    private var timeElapsed_: MutableLiveData<String> = MutableLiveData("00:00")
+    val timeElapsed: LiveData<String> = timeElapsed_
 
     private var _binding: FragmentRaceBinding? = null
     // This property is only valid between onCreateView and
@@ -65,11 +70,10 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
      */
     private fun endRace() {
         viewModel.endRace()
+        timer.cancel()
+        timeElapsed_.value = "00:00"
         viewAdapter.onDatasetChange()
         _binding?.invalidateAll()
-        // Reset buttons
-        _binding?.toggleRaceStatusButton?.text = "Start Race"
-        _binding?.endRaceButton?.visibility = View.GONE
     }
 
     override fun onCreateView(
@@ -79,7 +83,7 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         _binding = FragmentRaceBinding.inflate(inflater, container, false)
-        _binding?.lifecycleOwner = this
+        _binding?.lifecycleOwner = viewLifecycleOwner
         // We have to grab race from database asynchronously, so pass in null for now
         val racesDao = activity?.let { CC_ScoringDatabase.getInstance(it).racesDao() }
 
@@ -88,6 +92,8 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
         viewModelFactory = RaceViewModelFactory(null, teams, racesDao, this)
         viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
         _binding?.viewModel = viewModel
+        timer = CountUpTimer(this)
+        _binding?.timeElapsed = timeElapsed
 
         lifecycleScope.launch(Dispatchers.IO) {
             // FIXME using hard-coded raceId of 1 for now- need to implement multiple race feature.
@@ -121,15 +127,19 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
         // Indicate that this fragment would like to add items to Options Menu
         setHasOptionsMenu(true)
 
-        _binding?.toggleRaceStatusButton?.setOnClickListener(this)
-        _binding?.endRaceButton?.setOnClickListener(this)
+        _binding?.startRaceButton?.setOnClickListener(this)
 
         return _binding?.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_main, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning
+        super.onPrepareOptionsMenu(menu)
     }
 
     // Item in top bar selected. Act on it!
@@ -138,6 +148,15 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
             R.id.edit_race_button -> {
                 val action = RaceFragmentDirections.actionRaceFragmentToEditTeamsFragment()
                 NavHostFragment.findNavController(nav_host_fragment).navigate(action)
+                true
+            }
+            R.id.end_race_button -> {
+                // Ask if we should stop the race
+                askForConfirmation(getString(R.string.confirm_race_clear),
+                    "End Race",
+                    ::endRace,
+                    "Cancel",
+                    {})
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -150,31 +169,20 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener 
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.toggleRaceStatusButton -> {
-                if (raceRunning) {
-                    // Stop the race!
-                    _binding?.toggleRaceStatusButton?.text = "Resume"
-                    // FIXME create better color scheme
-                    _binding?.toggleRaceStatusButton?.background?.setColorFilter(Color.GREEN, PorterDuff.Mode.MULTIPLY)
-                    _binding?.endRaceButton?.visibility = View.VISIBLE
-                    raceRunning = false
-                }
-                else {
-                    // Start or resume the race!
-                    _binding?.toggleRaceStatusButton?.text = "Pause"
-                    // FIXME create better color scheme
-                    _binding?.toggleRaceStatusButton?.background?.setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY)
-                    _binding?.endRaceButton?.visibility = View.GONE
-                    raceRunning = true
-                }
-            }
-            R.id.endRaceButton -> {
-                askForConfirmation(getString(R.string.confirm_race_clear),
-                    "End Race",
-                    ::endRace,
-                    "Cancel",
-                    {})
+            R.id.startRaceButton -> {
+                startRace()
             }
         }
+    }
+
+    private fun startRace() {
+        viewModel.startRace()
+        timer.start()
+        _binding?.invalidateAll()
+        activity?.invalidateOptionsMenu()
+    }
+
+    override fun timerChanged(newTime: String) {
+        timeElapsed_.value = newTime
     }
 }

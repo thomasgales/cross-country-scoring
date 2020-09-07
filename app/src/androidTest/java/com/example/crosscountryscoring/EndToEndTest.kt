@@ -3,6 +3,7 @@ package com.example.crosscountryscoring
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
@@ -10,6 +11,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import org.hamcrest.core.StringContains
 import org.junit.*
 import org.junit.runner.RunWith
@@ -233,7 +235,7 @@ class EndToEndTest {
     @Test
     fun endRace_ClearsScores() {
         // Start the race
-        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(withId(R.id.startRaceButton)).perform(click())
         // Increment a couple scores
         onView(withId(R.id.race_recycler_view)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
@@ -243,9 +245,10 @@ class EndToEndTest {
             actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
                 click()
             ))
-        // Pause and end race
-        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
-        onView(withId(R.id.endRaceButton)).perform(click())
+        // Pause and end race.
+        // Espresso can't find overflow menu items by id
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext);
+        onView(withText(R.string.end_race)).perform(click())
         onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button1)).perform(click())
         // Verify scores are cleared
@@ -275,7 +278,7 @@ class EndToEndTest {
     @Test
     fun cancelEndRace_DoesNotClearScores() {
         // Start the race
-        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
+        onView(withId(R.id.startRaceButton)).perform(click())
         // Increment a couple scores
         onView(withId(R.id.race_recycler_view)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
@@ -285,9 +288,10 @@ class EndToEndTest {
             actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
                 click()
             ))
-        // Pause and end race
-        onView(withId(R.id.toggleRaceStatusButton)).perform(click())
-        onView(withId(R.id.endRaceButton)).perform(click())
+        // Pause and end race.
+        // Espresso can't find overflow items by id
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+        onView(withText(R.string.end_race)).perform(click())
         onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button2)).perform(click())
         // Verify scores are cleared
@@ -440,4 +444,35 @@ class EndToEndTest {
         )
     }
 
+    @Test
+    fun startRaceEndRace_ManipulatesTimer() {
+        // Make sure timer is initialized correctly
+        onView(withId(R.id.raceTimerTextView)).check(
+            matches(
+                withText(R.string.default_time)
+            )
+        )
+        // Start the race
+        onView(withId(R.id.startRaceButton)).perform(click())
+        // Wait slightly more than 1 second so timer can iterate.
+        // Normally would be wary of using Thread.sleep(), but this is one of the rare cases
+        //  where it makes sense (because we are testing the behavior of a timer itself)
+        Thread.sleep(1250)
+        onView(withId(R.id.raceTimerTextView)).check(
+            matches(
+                withText("00:01")
+            )
+        )
+        //Pause and end race.
+        // Espresso can't find overflow menu items by id
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext);
+        onView(withText(R.string.end_race)).perform(click())
+        onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
+        onView(withId(android.R.id.button1)).perform(click())
+        onView(withId(R.id.raceTimerTextView)).check(
+            matches(
+                withText("00:00")
+            )
+        )
+    }
 }
