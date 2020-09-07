@@ -1,9 +1,9 @@
 package com.example.crosscountryscoring.scoring
 
-import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*

@@ -25,13 +25,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@id/confirmDeleteTeamsButton"
-                android:text="Cancel"/>
+                android:text="@string/cancel"/>
             <Button
                 android:id="@+id/confirmDeleteTeamsButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:text="Delete"/>
+                android:text="@string/delete_teams"/>
         </RelativeLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
