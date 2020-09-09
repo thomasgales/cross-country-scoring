@@ -6,6 +6,8 @@ import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
 import com.example.crosscountryscoring.scoring.OnRunnerFinishedListener
 import com.example.crosscountryscoring.scoring.RaceViewModel
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,5 +66,24 @@ class RaceViewModelUnitTests {
         vm.onTeamClicked(mockTeamVm)
         vm.endRace()
         assert(vm.race.value!!.numberFinishedRunners == 0)
+    }
+
+    @Test
+    fun startRace_CausesRaceRunningTrue() {
+        val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
+        val race = Race("Penn")
+        val vm = RaceViewModel(race, teams, mockRacesDao, runnerFinishedListener)
+        vm.startRace()
+        assertTrue(vm.raceRunning)
+    }
+
+    @Test
+    fun endRace_CausesRaceRunningFalse() {
+        val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
+        val race = Race("Penn")
+        val vm = RaceViewModel(race, teams, mockRacesDao, runnerFinishedListener)
+        vm.startRace()
+        vm.endRace()
+        assertFalse(vm.raceRunning)
     }
 }

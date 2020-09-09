@@ -2,7 +2,6 @@ package com.example.crosscountryscoring.scoring
 
 import androidx.lifecycle.*
 import com.example.crosscountryscoring.ITeamViewModel
-import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +23,8 @@ class RaceViewModel(databaseRace: Race?,
     private var race_ : MutableLiveData<Race?> = MutableLiveData(databaseRace)
     var race: LiveData<Race?> = race_; private set
 
+    var raceRunning: Boolean = false; private set
+
     /**
      * Ends the race. For now, simply resets all scores.
      */
@@ -39,12 +40,20 @@ class RaceViewModel(databaseRace: Race?,
                 team.clearScore()
             }
         }
+        raceRunning = false
     }
 
     fun setDatabaseRace(databaseRace: Race?) {
         race_ = MutableLiveData(databaseRace)
         race = race_
         runnerFinishedListener.onRunnerFinished()
+    }
+
+    /**
+     * Starts the race timer.
+     */
+    fun startRace() {
+        raceRunning = true
     }
 
     /**

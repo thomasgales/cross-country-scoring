@@ -30,6 +30,18 @@ class EditTeamsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModelFactory = EditTeamsViewModelFactory(sharedVm)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(EditTeamsViewModel::class.java)
+
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
+            findNavController().navigateUp()
+        }
+        callback.isEnabled = true
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,16 +50,13 @@ class EditTeamsFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         _binding = FragmentEditTeamsBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
-        viewModelFactory = EditTeamsViewModelFactory(sharedVm)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(EditTeamsViewModel::class.java)
-
-        viewManager = LinearLayoutManager(activity)
 
         viewAdapter = EditTeamsRecyclerViewAdapter(sharedVm.teams)
         sharedVm.teams.observe(viewLifecycleOwner, Observer {
             viewAdapter.onDatasetChange()
         })
 
+        viewManager = LinearLayoutManager(activity)
         recyclerView = binding.editTeamsRecyclerView.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
@@ -65,12 +74,6 @@ class EditTeamsFragment : Fragment() {
 
         // Indicate that this fragment would like to add items to Options Menu
         setHasOptionsMenu(true)
-
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            viewModel.verifyAndSaveChanges(viewAdapter.getTeams())
-            findNavController().navigateUp()
-        }
-        callback.isEnabled = true
 
         return binding.root
     }

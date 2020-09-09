@@ -1,9 +1,9 @@
 package com.example.crosscountryscoring.deleteteams
 
-import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -55,6 +55,12 @@ class DeleteTeamsFragment : Fragment() {
         findNavController().navigateUp()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModelFactory = DeleteTeamsViewModelFactory(sharedVm)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(DeleteTeamsViewModel::class.java)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,8 +69,6 @@ class DeleteTeamsFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         _binding = FragmentDeleteTeamsBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
-        viewModelFactory = DeleteTeamsViewModelFactory(sharedVm)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(DeleteTeamsViewModel::class.java)
 
         viewManager = LinearLayoutManager(activity)
 
