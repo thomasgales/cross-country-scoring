@@ -9,11 +9,15 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/delete_teams_recycler_view"
-            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:scrollbars="vertical" />
+            android:layout_height="0dp"
+            android:scrollbars="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHeight_default="wrap"
+            app:layout_constraintBottom_toTopOf="@id/deleteTeamsRegion"/>
 
         <RelativeLayout
+            android:id="@+id/deleteTeamsRegion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/cardview_dark_background"
@@ -24,13 +28,13 @@
                 android:id="@+id/cancelDeleteTeamsButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/confirmDeleteTeamsButton"
+                android:layout_toStartOf="@id/confirmDeleteTeamsButton"
                 android:text="@string/cancel"/>
             <Button
                 android:id="@+id/confirmDeleteTeamsButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:text="@string/delete_teams"/>
         </RelativeLayout>
 
