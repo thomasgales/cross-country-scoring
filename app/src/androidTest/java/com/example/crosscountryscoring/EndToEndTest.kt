@@ -7,6 +7,7 @@ import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
+import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -474,5 +475,139 @@ class EndToEndTest {
                 withText("00:00")
             )
         )
+    }
+
+    @Test
+    fun largeNumberOfTeams_EditNamesCorrectly() {
+        onView(withId(R.id.edit_race_button)).perform(click())
+        // Add lots of teams
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        // Change names so we can correctly identify them
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                12, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central2")))
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                15, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central3")))
+        onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
+        // Verify team names are correct on race fragment
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText("Elkhart Central Score: 0"))
+                )
+            )
+        )
+        onView(withId(R.id.race_recycler_view))
+            .perform(scrollToPosition<RecyclerView.ViewHolder>(12))
+            .check(matches(Utils.atPosition(12,
+                hasDescendant(withText("Elkhart Central2 Score: 0")))))
+        onView(withId(R.id.race_recycler_view))
+            .perform(scrollToPosition<RecyclerView.ViewHolder>(15))
+            .check(matches(Utils.atPosition(15,
+                hasDescendant(withText("Elkhart Central3 Score: 0")))))
+    }
+
+    @Test
+    fun largeNumberOfTeams_DeletesCorrectly() {
+        onView(withId(R.id.edit_race_button)).perform(click())
+        // Add lots of teams
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        onView(withId(R.id.add_team_button)).perform(click())
+        // Change names so we can correctly identify them
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                12, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central2")))
+        onView(withId(R.id.edit_teams_recycler_view))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                15, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central3")))
+        // Delete teams
+        onView(withId(R.id.deleteTeamsButton)).perform(click())
+        onView(withId(R.id.delete_teams_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                Utils.clickChildViewWithId(R.id.deleteTeamCheckbox)
+            ))
+        onView(withId(R.id.delete_teams_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(12,
+                Utils.clickChildViewWithId(R.id.deleteTeamCheckbox)
+            ))
+        onView(withId(R.id.delete_teams_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(15,
+                Utils.clickChildViewWithId(R.id.deleteTeamCheckbox)
+            ))
+        onView(withId(R.id.confirmDeleteTeamsButton)).perform(click())
+        onView(withText(R.string.confirm_delete_teams)).check(matches(isDisplayed()))
+        onView(withId(android.R.id.button1)).perform(click())
+        // Verify teams missing from race fragment
+        // Assert correct number of teams
+        onView(withId(R.id.edit_teams_recycler_view)).check(RecyclerViewItemCountAssertion(19))
+        onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
+        val targetContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
+        val scoreString = targetContext.resources.getString(R.string.team_score, "[Team Name]", 0)
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText(scoreString))
+                )
+            )
+        )
+        // Check positions above in case deleting position 0 worked but not the others
+        onView(withId(R.id.race_recycler_view))
+            .perform(scrollToPosition<RecyclerView.ViewHolder>(12))
+            .check(matches(Utils.atPosition(11,
+                hasDescendant(withText(scoreString)))))
+        onView(withId(R.id.race_recycler_view))
+            .perform(scrollToPosition<RecyclerView.ViewHolder>(12))
+            .check(matches(Utils.atPosition(12,
+                hasDescendant(withText(scoreString)))))
+        onView(withId(R.id.race_recycler_view))
+            .perform(scrollToPosition<RecyclerView.ViewHolder>(15))
+            .check(matches(Utils.atPosition(15,
+                hasDescendant(withText(scoreString)))))
     }
 }

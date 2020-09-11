@@ -14,6 +14,7 @@ class DeleteTeamViewHolder(private var binding: DeleteTeamViewBinding,
 
     fun bind(teamInfo : Pair<Team, DeleteState>) {
         binding.team = teamInfo.first
+        binding.delete = teamInfo.second
 
         binding.deleteTeamCheckbox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
