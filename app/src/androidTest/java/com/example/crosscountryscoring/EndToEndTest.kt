@@ -13,6 +13,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import androidx.test.uiautomator.UiDevice
 import org.hamcrest.core.StringContains
 import org.junit.*
 import org.junit.runner.RunWith
@@ -125,6 +126,35 @@ class EndToEndTest {
                 Utils.atPosition(
                     0,
                     hasDescendant(withText("[Team Name] Score: 15"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun bindings_RestoredAfterScreenRotation() {
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
+            ))
+        val device = UiDevice.getInstance(getInstrumentation())
+        device.setOrientationRight()
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
+            ))
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 3"))
+            )
+        )
+        val targetContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
+        val scoreString = targetContext.resources.getString(R.string.team_score, "[Team Name]", 3)
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText(scoreString))
                 )
             )
         )

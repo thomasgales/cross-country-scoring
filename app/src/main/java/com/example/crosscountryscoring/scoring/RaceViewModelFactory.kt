@@ -10,15 +10,13 @@ import java.lang.IllegalArgumentException
 
 class RaceViewModelFactory(private val race: Race?,
                            private val myTeams: LiveData<List<ITeamViewModel>>,
-                           private val racesDao: RacesDao?,
-                           private val runnerFinishedListener: OnRunnerFinishedListener)
+                           private val racesDao: RacesDao?)
     : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RaceViewModel::class.java)) {
             return RaceViewModel(race,
                                  myTeams,
-                                 racesDao,
-                                 runnerFinishedListener) as T
+                                 racesDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class in RaceViewModelFactory")
     }

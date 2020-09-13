@@ -19,15 +19,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-interface OnRunnerFinishedListener {
-    fun onRunnerFinished()
-}
-
 interface TimerChangedListener {
     fun timerChanged(newTime: String)
 }
 
-class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener, TimerChangedListener {
+class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
 
     private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
@@ -73,7 +69,6 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         timer.cancel()
         timeElapsed_.value = "00:00"
         viewAdapter.onDatasetChange()
-        _binding?.invalidateAll()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +78,7 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
 
         @Suppress("UNCHECKED_CAST")
         val teams = sharedVm.teams as LiveData<List<ITeamViewModel>>
-        viewModelFactory = RaceViewModelFactory(null, teams, racesDao, this)
+        viewModelFactory = RaceViewModelFactory(null, teams, racesDao)
         viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -138,13 +133,18 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         return _binding?.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_main, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning
+        menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning.value ?: true
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -169,10 +169,6 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         }
     }
 
-    override fun onRunnerFinished() {
-        _binding?.invalidateAll()
-    }
-
     override fun onClick(v: View) {
         when (v.id) {
             R.id.startRaceButton -> {
@@ -184,7 +180,6 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
     private fun startRace() {
         viewModel.startRace()
         timer.start()
-        _binding?.invalidateAll()
         activity?.invalidateOptionsMenu()
     }
 
