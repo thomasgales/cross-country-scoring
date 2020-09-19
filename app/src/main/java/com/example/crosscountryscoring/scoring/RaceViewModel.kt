@@ -22,8 +22,8 @@ class RaceViewModel(databaseRace: Race?,
     private var race_ = MutableLiveData<Race?>(databaseRace)
     var race: LiveData<Race?> = race_; private set
 
-    private var raceRunning_ = MutableLiveData<Boolean>(false)
-    val raceRunning: LiveData<Boolean> = raceRunning_
+    private var _raceRunning = MutableLiveData(false)
+    var raceRunning: LiveData<Boolean> = _raceRunning
 
     /**
      * Ends the race. For now, simply resets all scores.
@@ -42,7 +42,7 @@ class RaceViewModel(databaseRace: Race?,
                 team.clearScore()
             }
         }
-        raceRunning_.value = false
+        _raceRunning.value = false
     }
 
     fun setDatabaseRace(databaseRace: Race?) {
@@ -51,10 +51,10 @@ class RaceViewModel(databaseRace: Race?,
     }
 
     /**
-     * Starts the race timer.
+     * Marks the race as currently running.
      */
     fun startRace() {
-        raceRunning_.value = true
+        _raceRunning.value = true
     }
 
     /**
