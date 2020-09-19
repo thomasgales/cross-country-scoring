@@ -9,7 +9,7 @@
             type="com.example.crosscountryscoring.scoring.RaceViewModel" />
         <variable
             name="timeElapsed"
-            type="LiveData&lt;String>" />
+            type="LiveData&lt;Long>" />
     </data>
 
     <RelativeLayout
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/raceTimerTextView"
-            android:text="@{timeElapsed}"
+            android:text="@{@string/time_elapsed((timeElapsed / 60) % 60, timeElapsed % 60)}"
             android:textStyle="bold"
             android:textSize="24sp"
             android:layout_alignParentTop="true"

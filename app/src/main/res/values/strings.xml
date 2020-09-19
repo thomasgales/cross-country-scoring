@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Cross Country Scoring</string>
     <string name="current_race_finisher">Current Finisher: %s</string>
+    <string name="time_elapsed">%1$02d:%2$02d</string>
     <string name="team_score">%1$s Score: %2$d</string>
     <string name="confirm_race_clear">Are you sure you want to end the race? This will clear all scores and finishers.</string>
     <string name="confirm_delete_teams">
@@ -13,4 +14,11 @@
     <string name="default_time">00:00</string>
     <string name="delete_teams">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="timer_service_description">
+        Keeps track of time elapsed in Cross Country race.
+    </string>
+    <string name="race_timer_channel_name">Race Timer</string>
+    <string name="race_timer_channel_description">
+        Displays a notification alerting you that the race timer is still running.
+    </string>
 </resources>

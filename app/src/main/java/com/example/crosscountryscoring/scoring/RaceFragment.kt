@@ -1,8 +1,10 @@
 package com.example.crosscountryscoring.scoring
 
-import android.content.DialogInterface
+import android.content.*
 import android.os.Bundle
+import android.os.IBinder
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,11 +21,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-interface TimerChangedListener {
-    fun timerChanged(newTime: String)
-}
-
-class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
+class RaceFragment : Fragment(), View.OnClickListener {
 
     private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
@@ -31,14 +29,33 @@ class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewModelFactory: RaceViewModelFactory
     private val sharedVm: SharedTeamsViewModel by activityViewModels()
-    private lateinit var timer: CountUpTimer
 
-    private var timeElapsed_: MutableLiveData<String> = MutableLiveData("00:00")
-    val timeElapsed: LiveData<String> = timeElapsed_
+    private lateinit var timerService: CrossCountryRaceTimerService.LocalBinder
+    private var mBound = false
 
     private var _binding: FragmentRaceBinding? = null
     // This property is only valid between onCreateView and
     // onDestroyView.
+
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            timerService = service as CrossCountryRaceTimerService.LocalBinder
+            mBound = true
+            _binding?.timeElapsed = getSecondsElapsed()
+            // Check if service was previously started and activity was destroyed without
+            //  stopping the race. If so, tell view model the race is running.
+            if (timerService.raceTimerRunning.value == true) {
+                viewModel.startRace()
+            }
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
 
     /**
      * Displays an AlertDialog with the message and options specified.
@@ -65,10 +82,28 @@ class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
      * Ends the race. Clears all scores and finishers.
      */
     private fun endRace() {
+        Intent(activity, CrossCountryRaceTimerService::class.java).also {
+            activity?.unbindService(connection)
+        }
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.stopService(intent)
+            // Putting toast here instead of in service to avoid inadvertently showing toast if
+            //  service gets destroyed before ever being started
+            Toast.makeText(activity, "Race ended", Toast.LENGTH_SHORT).show()
+        }
         viewModel.endRace()
-        timer.cancel()
-        timeElapsed_.value = "00:00"
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
         viewAdapter.onDatasetChange()
+    }
+
+    private fun getSecondsElapsed() : LiveData<Long> {
+        return if (mBound) {
+            timerService.totalSecondsElapsed
+        } else {
+            MutableLiveData(0L)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,8 +127,6 @@ class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
                 viewModel.setDatabaseRace(race)
             }
         }
-
-        timer = CountUpTimer(this)
     }
 
     override fun onCreateView(
@@ -106,7 +139,7 @@ class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
         _binding?.lifecycleOwner = viewLifecycleOwner
 
         _binding?.viewModel = viewModel
-        _binding?.timeElapsed = timeElapsed
+        _binding?.timeElapsed = getSecondsElapsed()
 
         viewManager = LinearLayoutManager(activity)
         viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, this)
@@ -177,13 +210,25 @@ class RaceFragment : Fragment(), View.OnClickListener, TimerChangedListener {
         }
     }
 
-    private fun startRace() {
-        viewModel.startRace()
-        timer.start()
-        activity?.invalidateOptionsMenu()
+    override fun onStart() {
+        super.onStart()
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
     }
 
-    override fun timerChanged(newTime: String) {
-        timeElapsed_.value = newTime
+    override fun onStop() {
+        super.onStop()
+        activity?.unbindService(connection)
+        mBound = false
+    }
+
+    private fun startRace() {
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.startService(intent)
+            Toast.makeText(activity, "Race started", Toast.LENGTH_SHORT).show()
+        }
+        viewModel.startRace()
+        activity?.invalidateOptionsMenu()
     }
 }
