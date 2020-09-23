@@ -24,6 +24,8 @@ class EditTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<Team
         Pair(it.teamWithRunners.team, ChangeState.EXISTED)
     }?.toMutableList() ?: mutableListOf()
 
+    private var newestItemPosition = -1
+
     fun addTeam() {
         val team = Team("[Team Name]")
         myTeams.add(Pair(
@@ -31,6 +33,7 @@ class EditTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<Team
             ChangeState.ADDED
         ))
         notifyItemInserted(myTeams.size)
+        newestItemPosition = myTeams.size - 1
     }
 
     fun onDatasetChange() {
@@ -56,5 +59,8 @@ class EditTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<Team
 
     override fun onBindViewHolder(holder: EditTeamViewHolder, position: Int) {
         holder.bind(myTeams[position])
+        if (position == newestItemPosition) {
+            holder.selectText()
+        }
     }
 }

@@ -4,6 +4,7 @@ import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -208,6 +209,14 @@ class RaceFragment : Fragment(), View.OnClickListener {
                 startRace()
             }
         }
+    }
+
+    override fun onResume() {
+        // Hide keyboard if it was visible. Not relevant for this fragment.
+        val imm: InputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val windowToken = _binding?.root?.windowToken
+        imm.hideSoftInputFromWindow(windowToken, 0)
+        super.onResume()
     }
 
     override fun onStart() {
