@@ -1,8 +1,10 @@
 package com.example.crosscountryscoring.deleteteams
 
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -117,5 +119,13 @@ class DeleteTeamsFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onResume() {
+        // Hide keyboard if it was visible. Not relevant for this fragment.
+        val imm: InputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val windowToken = _binding?.root?.windowToken
+        imm.hideSoftInputFromWindow(windowToken, 0)
+        super.onResume()
     }
 }
