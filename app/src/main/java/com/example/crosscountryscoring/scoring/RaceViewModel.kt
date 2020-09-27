@@ -16,14 +16,14 @@ import kotlinx.coroutines.launch
  */
 class RaceViewModel(databaseRace: Race?,
                     private val myTeams: LiveData<List<ITeamViewModel>>,
-                    private val racesDao: RacesDao?,
-                    private val runnerFinishedListener: OnRunnerFinishedListener)
+                    private val racesDao: RacesDao?)
         : ViewModel(), RaceRecyclerViewAdapter.OnTeamClickedListener {
 
-    private var race_ : MutableLiveData<Race?> = MutableLiveData(databaseRace)
+    private var race_ = MutableLiveData<Race?>(databaseRace)
     var race: LiveData<Race?> = race_; private set
 
-    var raceRunning: Boolean = false; private set
+    private var _raceRunning = MutableLiveData(false)
+    var raceRunning: LiveData<Boolean> = _raceRunning
 
     /**
      * Ends the race. For now, simply resets all scores.
@@ -35,25 +35,26 @@ class RaceViewModel(databaseRace: Race?,
                 racesDao?.updateRace(it)
             }
         }
+        // Force observers to be notified
+        race_.value = race_.value
         myTeams.value?.let {
             for (team in it) {
                 team.clearScore()
             }
         }
-        raceRunning = false
+        _raceRunning.value = false
     }
 
     fun setDatabaseRace(databaseRace: Race?) {
         race_ = MutableLiveData(databaseRace)
         race = race_
-        runnerFinishedListener.onRunnerFinished()
     }
 
     /**
-     * Starts the race timer.
+     * Marks the race as currently running.
      */
     fun startRace() {
-        raceRunning = true
+        _raceRunning.value = true
     }
 
     /**
@@ -67,7 +68,8 @@ class RaceViewModel(databaseRace: Race?,
                 racesDao?.updateRace(it)
             }
         }
-        runnerFinishedListener.onRunnerFinished()
+        // Force Observers to be notified
+        race_.value = race_.value
         return race.value?.numberFinishedRunners ?: 0
     }
 

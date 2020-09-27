@@ -1,8 +1,11 @@
 package com.example.crosscountryscoring.scoring
 
-import android.content.DialogInterface
+import android.content.*
 import android.os.Bundle
+import android.os.IBinder
 import android.view.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,15 +22,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-interface OnRunnerFinishedListener {
-    fun onRunnerFinished()
-}
-
-interface TimerChangedListener {
-    fun timerChanged(newTime: String)
-}
-
-class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener, TimerChangedListener {
+class RaceFragment : Fragment(), View.OnClickListener {
 
     private lateinit var viewModel: RaceViewModel
     private lateinit var recyclerView: RecyclerView
@@ -35,14 +30,33 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewModelFactory: RaceViewModelFactory
     private val sharedVm: SharedTeamsViewModel by activityViewModels()
-    private lateinit var timer: CountUpTimer
 
-    private var timeElapsed_: MutableLiveData<String> = MutableLiveData("00:00")
-    val timeElapsed: LiveData<String> = timeElapsed_
+    private lateinit var timerService: CrossCountryRaceTimerService.LocalBinder
+    private var mBound = false
 
     private var _binding: FragmentRaceBinding? = null
     // This property is only valid between onCreateView and
     // onDestroyView.
+
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            timerService = service as CrossCountryRaceTimerService.LocalBinder
+            mBound = true
+            _binding?.timeElapsed = getSecondsElapsed()
+            // Check if service was previously started and activity was destroyed without
+            //  stopping the race. If so, tell view model the race is running.
+            if (timerService.raceTimerRunning.value == true) {
+                viewModel.startRace()
+            }
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
 
     /**
      * Displays an AlertDialog with the message and options specified.
@@ -69,11 +83,28 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
      * Ends the race. Clears all scores and finishers.
      */
     private fun endRace() {
+        Intent(activity, CrossCountryRaceTimerService::class.java).also {
+            activity?.unbindService(connection)
+        }
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.stopService(intent)
+            // Putting toast here instead of in service to avoid inadvertently showing toast if
+            //  service gets destroyed before ever being started
+            Toast.makeText(activity, "Race ended", Toast.LENGTH_SHORT).show()
+        }
         viewModel.endRace()
-        timer.cancel()
-        timeElapsed_.value = "00:00"
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
         viewAdapter.onDatasetChange()
-        _binding?.invalidateAll()
+    }
+
+    private fun getSecondsElapsed() : LiveData<Long> {
+        return if (mBound) {
+            timerService.totalSecondsElapsed
+        } else {
+            MutableLiveData(0L)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +114,7 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
 
         @Suppress("UNCHECKED_CAST")
         val teams = sharedVm.teams as LiveData<List<ITeamViewModel>>
-        viewModelFactory = RaceViewModelFactory(null, teams, racesDao, this)
+        viewModelFactory = RaceViewModelFactory(null, teams, racesDao)
         viewModel = ViewModelProvider(this, viewModelFactory).get(RaceViewModel::class.java)
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -97,8 +128,6 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
                 viewModel.setDatabaseRace(race)
             }
         }
-
-        timer = CountUpTimer(this)
     }
 
     override fun onCreateView(
@@ -111,7 +140,7 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         _binding?.lifecycleOwner = viewLifecycleOwner
 
         _binding?.viewModel = viewModel
-        _binding?.timeElapsed = timeElapsed
+        _binding?.timeElapsed = getSecondsElapsed()
 
         viewManager = LinearLayoutManager(activity)
         viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, this)
@@ -138,13 +167,19 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         return _binding?.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_main, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning
+        menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning.value ?: true
+        menu.findItem(R.id.reset_race_button).isVisible = (viewModel.raceRunning.value == false)
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -158,19 +193,24 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
             }
             R.id.end_race_button -> {
                 // Ask if we should stop the race
-                askForConfirmation(getString(R.string.confirm_race_clear),
+                askForConfirmation(getString(R.string.confirm_race_end),
                     "End Race",
                     ::endRace,
                     "Cancel",
                     {})
                 true
             }
+            R.id.reset_race_button -> {
+                // Ask if we should reset the race.
+                askForConfirmation(getString(R.string.confirm_race_reset),
+                    "Reset Race",
+                    ::resetRace,
+                    "Cancel",
+                    {})
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onRunnerFinished() {
-        _binding?.invalidateAll()
     }
 
     override fun onClick(v: View) {
@@ -181,14 +221,41 @@ class RaceFragment : Fragment(), OnRunnerFinishedListener, View.OnClickListener,
         }
     }
 
-    private fun startRace() {
-        viewModel.startRace()
-        timer.start()
-        _binding?.invalidateAll()
-        activity?.invalidateOptionsMenu()
+    override fun onResume() {
+        // Hide keyboard if it was visible. Not relevant for this fragment.
+        val imm: InputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val windowToken = _binding?.root?.windowToken
+        imm.hideSoftInputFromWindow(windowToken, 0)
+        super.onResume()
     }
 
-    override fun timerChanged(newTime: String) {
-        timeElapsed_.value = newTime
+    override fun onStart() {
+        super.onStart()
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activity?.unbindService(connection)
+        mBound = false
+    }
+
+    /**
+     * For now this has mostly the same effect as ending the race.
+     */
+    private fun resetRace() {
+        viewModel.endRace()
+        viewAdapter.onDatasetChange()
+    }
+
+    private fun startRace() {
+        Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
+            activity?.startService(intent)
+            Toast.makeText(activity, "Race started", Toast.LENGTH_SHORT).show()
+        }
+        viewModel.startRace()
+        activity?.invalidateOptionsMenu()
     }
 }
