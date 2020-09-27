@@ -280,7 +280,49 @@ class EndToEndTest {
         // Espresso can't find overflow menu items by id
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext);
         onView(withText(R.string.end_race)).perform(click())
-        onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
+        onView(withText(R.string.confirm_race_end)).check(matches(isDisplayed()))
+        onView(withId(android.R.id.button1)).perform(click())
+        // Verify scores are cleared
+        onView(withId(R.id.currentRunnerTextView)).check(
+            matches(
+                withText(StringContains.containsString("Current Finisher: 1"))
+            )
+        )
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    1,
+                    hasDescendant(withText("[Team Name] Score: 0"))
+                )
+            )
+        )
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    0,
+                    hasDescendant(withText("[Team Name] Score: 0"))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun resetRace_ClearsScores() {
+        // Increment a couple scores
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                click()
+            ))
+        onView(withId(R.id.race_recycler_view)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
+                click()
+            ))
+        // Reset race
+        // Espresso can't find overflow menu items by id
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+        // Test will fail if reset race button isn't visible for some reason
+        onView(withText(R.string.reset_race)).perform(click())
+        onView(withText(R.string.confirm_race_reset)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button1)).perform(click())
         // Verify scores are cleared
         onView(withId(R.id.currentRunnerTextView)).check(
@@ -323,7 +365,7 @@ class EndToEndTest {
         // Espresso can't find overflow items by id
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
         onView(withText(R.string.end_race)).perform(click())
-        onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
+        onView(withText(R.string.confirm_race_end)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button2)).perform(click())
         // Verify scores are cleared
         onView(withId(R.id.currentRunnerTextView)).check(
@@ -498,7 +540,7 @@ class EndToEndTest {
         // Espresso can't find overflow menu items by id
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext);
         onView(withText(R.string.end_race)).perform(click())
-        onView(withText(R.string.confirm_race_clear)).check(matches(isDisplayed()))
+        onView(withText(R.string.confirm_race_end)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button1)).perform(click())
         onView(withId(R.id.raceTimerTextView)).check(
             matches(

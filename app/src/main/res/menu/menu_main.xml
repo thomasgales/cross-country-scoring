@@ -11,4 +11,8 @@
         android:id="@+id/end_race_button"
         android:title="@string/end_race"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/reset_race_button"
+        android:title="@string/reset_race"
+        app:showAsAction="never"/>
 </menu>
