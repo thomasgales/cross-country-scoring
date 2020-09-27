@@ -179,6 +179,7 @@ class RaceFragment : Fragment(), View.OnClickListener {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning.value ?: true
+        menu.findItem(R.id.reset_race_button).isVisible = (viewModel.raceRunning.value == false)
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -192,9 +193,18 @@ class RaceFragment : Fragment(), View.OnClickListener {
             }
             R.id.end_race_button -> {
                 // Ask if we should stop the race
-                askForConfirmation(getString(R.string.confirm_race_clear),
+                askForConfirmation(getString(R.string.confirm_race_end),
                     "End Race",
                     ::endRace,
+                    "Cancel",
+                    {})
+                true
+            }
+            R.id.reset_race_button -> {
+                // Ask if we should reset the race.
+                askForConfirmation(getString(R.string.confirm_race_reset),
+                    "Reset Race",
+                    ::resetRace,
                     "Cancel",
                     {})
                 true
@@ -230,6 +240,14 @@ class RaceFragment : Fragment(), View.OnClickListener {
         super.onStop()
         activity?.unbindService(connection)
         mBound = false
+    }
+
+    /**
+     * For now this has mostly the same effect as ending the race.
+     */
+    private fun resetRace() {
+        viewModel.endRace()
+        viewAdapter.onDatasetChange()
     }
 
     private fun startRace() {
