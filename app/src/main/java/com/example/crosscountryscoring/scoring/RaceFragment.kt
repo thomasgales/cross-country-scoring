@@ -80,9 +80,9 @@ class RaceFragment : Fragment(), View.OnClickListener {
     }
 
     /**
-     * Ends the race. Clears all scores and finishers.
+     * Ends the race. Does NOT clear all scores and finishers.
      */
-    private fun endRace() {
+    private fun endRace(showRaceEndedToast: Boolean) {
         Intent(activity, CrossCountryRaceTimerService::class.java).also {
             activity?.unbindService(connection)
         }
@@ -90,7 +90,9 @@ class RaceFragment : Fragment(), View.OnClickListener {
             activity?.stopService(intent)
             // Putting toast here instead of in service to avoid inadvertently showing toast if
             //  service gets destroyed before ever being started
-            Toast.makeText(activity, "Race ended", Toast.LENGTH_SHORT).show()
+            if (showRaceEndedToast) {
+                Toast.makeText(activity, "Race ended", Toast.LENGTH_SHORT).show()
+            }
         }
         viewModel.endRace()
         Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
@@ -99,6 +101,9 @@ class RaceFragment : Fragment(), View.OnClickListener {
         viewAdapter.onDatasetChange()
     }
 
+    /**
+     * Returns the number of seconds that have elapsed since the race was last started.
+     */
     private fun getSecondsElapsed() : LiveData<Long> {
         return if (mBound) {
             timerService.totalSecondsElapsed
@@ -179,7 +184,6 @@ class RaceFragment : Fragment(), View.OnClickListener {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning.value ?: true
-        menu.findItem(R.id.reset_race_button).isVisible = (viewModel.raceRunning.value == false)
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -195,7 +199,7 @@ class RaceFragment : Fragment(), View.OnClickListener {
                 // Ask if we should stop the race
                 askForConfirmation(getString(R.string.confirm_race_end),
                     "End Race",
-                    ::endRace,
+                    {endRace(true)},
                     "Cancel",
                     {})
                 true
@@ -243,10 +247,12 @@ class RaceFragment : Fragment(), View.OnClickListener {
     }
 
     /**
-     * For now this has mostly the same effect as ending the race.
+     * Ends and resets the race.
      */
     private fun resetRace() {
-        viewModel.endRace()
+        endRace(false)
+        viewModel.resetRace()
+        Toast.makeText(activity, "Race reset", Toast.LENGTH_SHORT).show()
         viewAdapter.onDatasetChange()
     }
 

@@ -5,13 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
 import com.example.crosscountryscoring.scoring.RaceViewModel
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 
 /**
@@ -39,7 +38,7 @@ class RaceViewModelUnitTests {
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns true, race should iterate current finisher
-        assert(vm.race.value!!.numberFinishedRunners == 1)
+        assertEquals(1, vm.race.value!!.numberFinishedRunners)
     }
 
     @Test
@@ -51,17 +50,18 @@ class RaceViewModelUnitTests {
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns false, race should NOT iterate current finisher
-        assert(vm.race.value!!.numberFinishedRunners == 0)
+        assertEquals(0, vm.race.value!!.numberFinishedRunners)
     }
 
     @Test
-    fun endRace_ClearsRace() {
+    fun resetRace_ClearsRace() {
         val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
         val race = Race("Penn")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.onTeamClicked(mockTeamVm)
-        vm.endRace()
-        assert(vm.race.value!!.numberFinishedRunners == 0)
+        vm.resetRace()
+        assertEquals(0, vm.race.value!!.numberFinishedRunners)
+        verify(mockTeamVm, times(1)).clearScore()
     }
 
     @Test
@@ -70,7 +70,7 @@ class RaceViewModelUnitTests {
         val race = Race("Penn")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.startRace()
-        assertTrue(vm.raceRunning.value!!)
+        assertEquals(true, vm.raceRunning.value)
     }
 
     @Test
@@ -80,6 +80,6 @@ class RaceViewModelUnitTests {
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.startRace()
         vm.endRace()
-        assertFalse(vm.raceRunning.value!!)
+        assertEquals(false, vm.raceRunning.value)
     }
 }

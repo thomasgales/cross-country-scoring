@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.database.TeamWithRunners
 import com.example.crosscountryscoring.database.TeamsDaoStub
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +29,7 @@ class TeamViewModelUnitTests {
     fun runnerFinished_TeamScoreIncreases() {
         vm.runnerFinished(5)
         vm.runnerFinished(6)
-        Assert.assertEquals(11, penn.team.score)
+        assertEquals(11, penn.team.score)
     }
 
     @Test
@@ -42,7 +42,7 @@ class TeamViewModelUnitTests {
         vm.runnerFinished(6)
         vm.runnerFinished(7)
         vm.runnerFinished(8)
-        Assert.assertEquals(15, penn.team.score)
+        assertEquals(15, penn.team.score)
     }
 
     @Test
@@ -55,21 +55,21 @@ class TeamViewModelUnitTests {
         vm.runnerFinished(6)
         vm.runnerFinished(7)
         val runnerCounts = vm.runnerFinished(8)
-        assert(!runnerCounts)
-        assert(vm.getFinishers().size == 7)
+        assertEquals(false, runnerCounts)
+        assertEquals(7, vm.getFinishers().size)
     }
 
     @Test
     fun finishers_storeCorrectPlace() {
         vm.runnerFinished(5)
-        assert(vm.getFinishers()[0].place == 5)
+        assertEquals(5, vm.getFinishers()[0].place)
     }
 
     @Test
     fun clearScore_ClearsScoreAndRunners() {
         vm.runnerFinished(2)
         vm.clearScore()
-        assert(vm.getFinishers().isEmpty())
-        assert(vm.teamWithRunners.team.score == 0)
+        assertEquals(true, vm.getFinishers().isEmpty())
+        assertEquals(0, vm.teamWithRunners.team.score)
     }
 }
