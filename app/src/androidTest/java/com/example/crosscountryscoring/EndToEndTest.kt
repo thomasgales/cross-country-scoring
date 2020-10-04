@@ -11,9 +11,9 @@ import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
+import com.example.crosscountryscoring.NullConverter.runnerPlaceToString
 import org.hamcrest.core.StringContains
 import org.junit.*
 import org.junit.runner.RunWith
@@ -27,7 +27,10 @@ class EndToEndTest {
     companion object {
         @BeforeClass
         fun clearDatabase() {
-            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("pm clear com.example.crosscountryscoring").close()
+            getInstrumentation()
+                .uiAutomation
+                .executeShellCommand("pm clear com.example.crosscountryscoring")
+                .close()
         }
     }
 
@@ -45,7 +48,7 @@ class EndToEndTest {
     @Test
     fun useAppContext() {
         // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        val appContext = getInstrumentation().targetContext
         Assert.assertEquals("com.example.crosscountryscoring", appContext.packageName)
     }
 
@@ -71,11 +74,24 @@ class EndToEndTest {
             ))
         activityScenario.scenario.recreate()
         // Assert Team score restored
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            1,
+            runnerPlaceToString(context, 1),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("[Team Name] Score: 1"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -120,12 +136,25 @@ class EndToEndTest {
             actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
                 click()
             ))
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            15,
+            runnerPlaceToString(context, 1),
+            runnerPlaceToString(context, 2),
+            runnerPlaceToString(context, 3),
+            runnerPlaceToString(context, 4),
+            runnerPlaceToString(context, 5),
+            runnerPlaceToString(context, 6),
+            runnerPlaceToString(context, 7)
+        )
         // If Team didn't know the pre-recreate # of finishers, it would increase score past 15
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("[Team Name] Score: 15"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -148,8 +177,19 @@ class EndToEndTest {
                 withText(StringContains.containsString("Current Finisher: 3"))
             )
         )
-        val targetContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val scoreString = targetContext.resources.getString(R.string.team_score, "[Team Name]", 3)
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            3,
+            runnerPlaceToString(context, 1),
+            runnerPlaceToString(context, 2),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
@@ -187,19 +227,45 @@ class EndToEndTest {
             actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
                 click()
             ))
+        // Verify team scores and runner finishing positions correct
+        val context: Context = getInstrumentation().targetContext
+        var scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            3,
+            runnerPlaceToString(context, 1),
+            runnerPlaceToString(context, 2),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("[Team Name] Score: 3"))
+                    hasDescendant(withText(scoreString))
                 )
             )
+        )
+        scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            3,
+            runnerPlaceToString(context, 3),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
         )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     1,
-                    hasDescendant(withText("[Team Name] Score: 3"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -253,18 +319,32 @@ class EndToEndTest {
             .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
                 0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
         onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
+        // Verify
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "Elkhart Central",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("Elkhart Central Score: 0"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
     }
 
     @Test
-    fun endRace_ClearsScores() {
+    fun endRace_DoesNotClearScores() {
         // Start the race
         onView(withId(R.id.startRaceButton)).perform(click())
         // Increment a couple scores
@@ -280,27 +360,53 @@ class EndToEndTest {
         // Espresso can't find overflow menu items by id
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext);
         onView(withText(R.string.end_race)).perform(click())
-        onView(withText(R.string.confirm_race_end)).check(matches(isDisplayed()))
+        onView(withText(R.string.confirm_race_end))
+            .check(matches(isDisplayed()))
         onView(withId(android.R.id.button1)).perform(click())
         // Verify scores are cleared
         onView(withId(R.id.currentRunnerTextView)).check(
             matches(
-                withText(StringContains.containsString("Current Finisher: 1"))
+                withText(StringContains.containsString("Current Finisher: 3"))
             )
         )
-        onView(withId(R.id.race_recycler_view)).check(
-            matches(
-                Utils.atPosition(
-                    1,
-                    hasDescendant(withText("[Team Name] Score: 0"))
-                )
-            )
+        val context: Context = getInstrumentation().targetContext
+        var scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            1,
+            runnerPlaceToString(context, 1),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
         )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("[Team Name] Score: 0"))
+                    hasDescendant(withText(scoreString))
+                )
+            )
+        )
+        scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            2,
+            runnerPlaceToString(context, 2),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
+        onView(withId(R.id.race_recycler_view)).check(
+            matches(
+                Utils.atPosition(
+                    1,
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -322,7 +428,8 @@ class EndToEndTest {
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
         // Test will fail if reset race button isn't visible for some reason
         onView(withText(R.string.reset_race)).perform(click())
-        onView(withText(R.string.confirm_race_reset)).check(matches(isDisplayed()))
+        onView(withText(R.string.confirm_race_reset))
+            .check(matches(isDisplayed()))
         onView(withId(android.R.id.button1)).perform(click())
         // Verify scores are cleared
         onView(withId(R.id.currentRunnerTextView)).check(
@@ -330,11 +437,24 @@ class EndToEndTest {
                 withText(StringContains.containsString("Current Finisher: 1"))
             )
         )
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     1,
-                    hasDescendant(withText("[Team Name] Score: 0"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -342,7 +462,7 @@ class EndToEndTest {
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("[Team Name] Score: 0"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -367,25 +487,50 @@ class EndToEndTest {
         onView(withText(R.string.end_race)).perform(click())
         onView(withText(R.string.confirm_race_end)).check(matches(isDisplayed()))
         onView(withId(android.R.id.button2)).perform(click())
-        // Verify scores are cleared
+        // Verify scores are not cleared
         onView(withId(R.id.currentRunnerTextView)).check(
             matches(
                 withText(StringContains.containsString("Current Finisher: 3"))
             )
         )
+        val context: Context = getInstrumentation().targetContext
+        var scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            1,
+            runnerPlaceToString(context, 1),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("[Team Name] Score: 1"))
+                    hasDescendant(withText(scoreString))
                 )
             )
+        )
+        scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            2,
+            runnerPlaceToString(context, 2),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
         )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     1,
-                    hasDescendant(withText("[Team Name] Score: 2"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
@@ -422,7 +567,8 @@ class EndToEndTest {
         onView(withId(R.id.edit_race_button)).perform(click())
         onView(withId(R.id.edit_teams_recycler_view))
             .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central")))
+                0, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central"))
+            )
         // Go delete the team
         onView(withId(R.id.deleteTeamsButton)).perform(click())
         onView(withId(R.id.delete_teams_recycler_view)).perform(
@@ -443,8 +589,19 @@ class EndToEndTest {
         )
         // Verify team is missing from race fragment
         onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
-        val targetContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val scoreString = targetContext.resources.getString(R.string.team_score, "[Team Name]", 0)
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
@@ -536,7 +693,7 @@ class EndToEndTest {
                 withText("00:01")
             )
         )
-        //Pause and end race.
+        // Pause and end race.
         // Espresso can't find overflow menu items by id
         openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext);
         onView(withText(R.string.end_race)).perform(click())
@@ -544,7 +701,7 @@ class EndToEndTest {
         onView(withId(android.R.id.button1)).perform(click())
         onView(withId(R.id.raceTimerTextView)).check(
             matches(
-                withText("00:00")
+                withText(R.string.default_time)
             )
         )
     }
@@ -585,22 +742,59 @@ class EndToEndTest {
                 15, Utils.replaceTextForId(R.id.team_name_edit_box, "Elkhart Central3")))
         onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
         // Verify team names are correct on race fragment
+        val context: Context = getInstrumentation().targetContext
+        var scoreString = context.resources.getString(
+            R.string.team_score,
+            "Elkhart Central",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(
                     0,
-                    hasDescendant(withText("Elkhart Central Score: 0"))
+                    hasDescendant(withText(scoreString))
                 )
             )
         )
+
+        scoreString = context.resources.getString(
+            R.string.team_score,
+            "Elkhart Central2",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view))
             .perform(scrollToPosition<RecyclerView.ViewHolder>(12))
-            .check(matches(Utils.atPosition(12,
-                hasDescendant(withText("Elkhart Central2 Score: 0")))))
+            .check(matches(Utils.atPosition(12, hasDescendant(withText(scoreString)))))
+
+        scoreString = context.resources.getString(
+            R.string.team_score,
+            "Elkhart Central3",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view))
             .perform(scrollToPosition<RecyclerView.ViewHolder>(15))
-            .check(matches(Utils.atPosition(15,
-                hasDescendant(withText("Elkhart Central3 Score: 0")))))
+            .check(matches(Utils.atPosition(15, hasDescendant(withText(scoreString)))))
     }
 
     @Test
@@ -658,8 +852,19 @@ class EndToEndTest {
         // Assert correct number of teams
         onView(withId(R.id.edit_teams_recycler_view)).check(RecyclerViewItemCountAssertion(19))
         onView(withContentDescription(R.string.nav_app_bar_navigate_up_description)).perform(click())
-        val targetContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val scoreString = targetContext.resources.getString(R.string.team_score, "[Team Name]", 0)
+        val context: Context = getInstrumentation().targetContext
+        val scoreString = context.resources.getString(
+            R.string.team_score,
+            "[Team Name]",
+            0,
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0),
+            runnerPlaceToString(context, 0)
+        )
         onView(withId(R.id.race_recycler_view)).check(
             matches(
                 Utils.atPosition(

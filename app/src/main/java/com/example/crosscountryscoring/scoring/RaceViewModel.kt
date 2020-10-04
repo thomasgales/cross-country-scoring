@@ -19,58 +19,17 @@ class RaceViewModel(databaseRace: Race?,
                     private val racesDao: RacesDao?)
         : ViewModel(), RaceRecyclerViewAdapter.OnTeamClickedListener {
 
-    private var race_ = MutableLiveData<Race?>(databaseRace)
-    var race: LiveData<Race?> = race_; private set
+    private var _race = MutableLiveData<Race?>(databaseRace)
+    var race: LiveData<Race?> = _race; private set
 
     private var _raceRunning = MutableLiveData(false)
     var raceRunning: LiveData<Boolean> = _raceRunning
 
     /**
-     * Ends the race. For now, simply resets all scores.
+     * Ends the race.
      */
     fun endRace() {
-        race_.value?.let {
-            it.numberFinishedRunners = 0
-            viewModelScope.launch(Dispatchers.IO) {
-                racesDao?.updateRace(it)
-            }
-        }
-        // Force observers to be notified
-        race_.value = race_.value
-        myTeams.value?.let {
-            for (team in it) {
-                team.clearScore()
-            }
-        }
         _raceRunning.value = false
-    }
-
-    fun setDatabaseRace(databaseRace: Race?) {
-        race_ = MutableLiveData(databaseRace)
-        race = race_
-    }
-
-    /**
-     * Marks the race as currently running.
-     */
-    fun startRace() {
-        _raceRunning.value = true
-    }
-
-    /**
-     * Iterates the current finisher place.
-     * @return the number of finished runners.
-     */
-    private fun runnerFinished(): Int {
-        race_.value?.let {
-            it.numberFinishedRunners++
-            viewModelScope.launch(Dispatchers.IO) {
-                racesDao?.updateRace(it)
-            }
-        }
-        // Force Observers to be notified
-        race_.value = race_.value
-        return race.value?.numberFinishedRunners ?: 0
     }
 
     /**
@@ -82,5 +41,58 @@ class RaceViewModel(databaseRace: Race?,
         if (teamViewModel.runnerFinished(potentialPlace)) {
             runnerFinished()
         }
+    }
+
+    /**
+     * Resets all team scores and finishers.
+     */
+    fun resetRace() {
+        // Reset number of finished runners in race
+        _race.value?.let {
+            it.numberFinishedRunners = 0
+            viewModelScope.launch(Dispatchers.IO) {
+                racesDao?.updateRace(it)
+            }
+        }
+        // Force observers to be notified
+        _race.value = _race.value
+        // Reset team scores
+        myTeams.value?.let {
+            for (team in it) {
+                team.clearScore()
+            }
+        }
+    }
+
+    /**
+     * Iterates the current finisher place.
+     * @return the number of finished runners.
+     */
+    private fun runnerFinished(): Int {
+        _race.value?.let {
+            it.numberFinishedRunners++
+            viewModelScope.launch(Dispatchers.IO) {
+                racesDao?.updateRace(it)
+            }
+        }
+        // Force Observers to be notified
+        _race.value = _race.value
+        return race.value?.numberFinishedRunners ?: 0
+    }
+
+    /**
+     * To prevent blocking the UI thread, the Race will not be immediately available when this class
+     *  is instantiated. Because of that, RaceFragment needs to update _race at a later time.
+     */
+    fun setDatabaseRace(databaseRace: Race?) {
+        _race = MutableLiveData(databaseRace)
+        race = _race
+    }
+
+    /**
+     * Marks the race as currently running.
+     */
+    fun startRace() {
+        _raceRunning.value = true
     }
 }

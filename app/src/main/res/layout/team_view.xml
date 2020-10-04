@@ -2,9 +2,10 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
+        <import type="com.example.crosscountryscoring.NullConverter"/>
         <variable
             name="viewModel"
-            type="com.example.crosscountryscoring.TeamViewModel" />
+            type="com.example.crosscountryscoring.TeamViewModel"/>
     </data>
 
     <LinearLayout
@@ -16,7 +17,7 @@
             android:id="@+id/team_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{@string/team_score(viewModel.teamWithRunners.team.name, viewModel.teamWithRunners.team.score)}"/>
+            android:text="@{@string/team_score(viewModel.teamWithRunners.team.name, viewModel.teamWithRunners.team.score, NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[0].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[1].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[2].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[3].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[4].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[5].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[6].place))}"/>
 
     </LinearLayout>
 
