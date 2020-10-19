@@ -14,7 +14,7 @@ class TeamViewHolder(private var binding: TeamViewBinding,
         RecyclerView.ViewHolder(binding.root), View.OnClickListener {
 
     private lateinit var teamViewModel: TeamViewModel
-    var teamBtn : Button = binding.teamName
+    var teamBtn : Button = binding.teamAddFinisherBtn
 
     init {
         teamBtn.setOnClickListener(this)

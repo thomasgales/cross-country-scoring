@@ -21,16 +21,26 @@ class SharedTeamsViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     /**
-     * Refreshes the *list* of teams from the database.
+     * Refreshes the *list* of teams from the database. Creates, reuses or deletes TeamViewModels as
+     *  necessary.
      */
     override fun updateListOfTeams() {
         viewModelScope.launch(Dispatchers.IO) {
             val savedTeams = teamsDao.getAllTeams()
             // Unable to have DAO return list of LiveData<Team>, so we end up having to query the
             //  DAO again for each actual Team.
+            // First, make sure the team doesn't already have a view model assigned to it.
+            val oldTeamViewModels = teams.value
             _teams.postValue(savedTeams.map {
-                val team = teamsDao.getRunners(it)
-                TeamViewModel(team, teamsDao)
+                val oldTeamViewModel = oldTeamViewModels?.find { vm -> vm.team.value?.teamId == it }
+                if (oldTeamViewModel == null) {
+                    val team = teamsDao.getTeam(it)
+                    val runners = teamsDao.getRunners(it)
+                    TeamViewModel(team, runners.toMutableList(), teamsDao)
+                }
+                else {
+                    oldTeamViewModel
+                }
             })
         }
     }

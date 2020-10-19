@@ -6,6 +6,7 @@ import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  * Business logic for a Race.
@@ -23,7 +24,15 @@ class RaceViewModel(databaseRace: Race?,
     var race: LiveData<Race?> = _race; private set
 
     private var _raceRunning = MutableLiveData(false)
-    var raceRunning: LiveData<Boolean> = _raceRunning
+    val raceRunning: LiveData<Boolean> = _raceRunning
+
+    private var _undoAvailable = MutableLiveData(false)
+    val undoAvailable: LiveData<Boolean> = _undoAvailable
+
+    // In the near future this LinkedList can be safely changed to ArrayDeque.
+    // Still in the experimental stage so I'm avoiding it for now:
+    //  https://discuss.kotlinlang.org/t/why-kotlin-does-not-provide-arraydeque-implementation/16140
+    private val teamFinishQueue: Deque<ITeamViewModel> = LinkedList<ITeamViewModel>()
 
     /**
      * Ends the race.
@@ -40,6 +49,7 @@ class RaceViewModel(databaseRace: Race?,
         val potentialPlace = race.value?.numberFinishedRunners?.plus(1) ?: 0
         if (teamViewModel.runnerFinished(potentialPlace)) {
             runnerFinished()
+            teamFinishQueue.addFirst(teamViewModel)
         }
     }
 
@@ -62,6 +72,7 @@ class RaceViewModel(databaseRace: Race?,
                 team.clearScore()
             }
         }
+        _undoAvailable.value = false
     }
 
     /**
@@ -75,6 +86,7 @@ class RaceViewModel(databaseRace: Race?,
                 racesDao?.updateRace(it)
             }
         }
+        _undoAvailable.value = true
         // Force Observers to be notified
         _race.value = _race.value
         return race.value?.numberFinishedRunners ?: 0
@@ -87,6 +99,7 @@ class RaceViewModel(databaseRace: Race?,
     fun setDatabaseRace(databaseRace: Race?) {
         _race = MutableLiveData(databaseRace)
         race = _race
+        _undoAvailable.postValue((race.value?.numberFinishedRunners ?: 0) > 0)
     }
 
     /**
@@ -94,5 +107,32 @@ class RaceViewModel(databaseRace: Race?,
      */
     fun startRace() {
         _raceRunning.value = true
+    }
+
+    /**
+     * Reverses the last team button press, if possible.
+     * @return UndoFinisherResult indicating if undo was able to be performed.
+     *  - If performed, teamPerformedOn will be the name of the removed finisher's team.
+     *  - If not performed, teamPerformedOn will be an empty string.
+     */
+    fun undoRunnerFinished() : UndoFinisherResult {
+        if (teamFinishQueue.isNotEmpty()) {
+            val teamViewModel = teamFinishQueue.removeFirst()
+            val runnerRemoved = teamViewModel.undoRunnerFinished()
+            if (runnerRemoved) {
+                _race.value?.let {
+                    it.numberFinishedRunners--
+                    viewModelScope.launch(Dispatchers.IO) {
+                        racesDao?.updateRace(it)
+                    }
+                    // Force Observers to be notified
+                    _race.value = _race.value
+                }
+            }
+            _undoAvailable.postValue((race.value?.numberFinishedRunners ?: 0) > 0)
+            return UndoFinisherResult(true,
+                teamViewModel.team.value?.name ?: "")
+        }
+        return UndoFinisherResult(false, "")
     }
 }

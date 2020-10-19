@@ -14,10 +14,10 @@
         android:layout_height="100dp">
 
         <Button
-            android:id="@+id/team_name"
+            android:id="@+id/team_add_finisher_btn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@{@string/team_score(viewModel.teamWithRunners.team.name, viewModel.teamWithRunners.team.score, NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[0].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[1].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[2].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[3].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[4].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[5].place), NullConverter.runnerPlaceToString(context, viewModel.teamWithRunners.runners[6].place))}"/>
+            android:text="@{@string/team_score(viewModel.team.name, viewModel.team.score, NullConverter.runnerPlaceToString(context, viewModel.finishers[0].place), NullConverter.runnerPlaceToString(context, viewModel.finishers[1].place), NullConverter.runnerPlaceToString(context, viewModel.finishers[2].place), NullConverter.runnerPlaceToString(context, viewModel.finishers[3].place), NullConverter.runnerPlaceToString(context, viewModel.finishers[4].place), NullConverter.runnerPlaceToString(context, viewModel.finishers[5].place), NullConverter.runnerPlaceToString(context, viewModel.finishers[6].place))}"/>
 
     </LinearLayout>
 

@@ -45,8 +45,8 @@ class RacesDaoTests {
     @Throws(Exception::class)
     fun updateAndGetRace() {
         val race = Race("TestRace")
-        val raceId = racesDao.addRace(race)
         race.numberFinishedRunners = 5
+        val raceId = racesDao.addRace(race)
         val dbRace = racesDao.getRace(raceId)
         assert(dbRace.numberFinishedRunners == 5)
     }

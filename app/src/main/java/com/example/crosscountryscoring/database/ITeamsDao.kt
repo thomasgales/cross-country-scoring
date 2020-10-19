@@ -19,13 +19,22 @@ interface ITeamsDao {
     fun clearRunners()
 
     /**
+     * Deletes the specified runner from the list of finished runners.
+     */
+    fun deleteRunner(runner: Runner)
+
+    /**
      * Returns the team with a matching teamId (if it exists).
      */
     fun getTeam(teamId: Long): Team
 
     /**
-     * Finds the team in the "database" with a matching teamId (if it exists)
-     * and updates to match data in the "team" parameter.
+     * Changes the name of the team with primary key of teamId to be newName.
      */
-    fun updateTeam(team: Team)
+    fun updateTeamName(teamId: Long, newName: String)
+
+    /**
+     * Changes the score of the team with primary key of teamId to be newScore.
+     */
+    fun updateTeamScore(teamId: Long, newScore: Int)
 }

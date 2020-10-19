@@ -53,7 +53,7 @@ class EditTeamsFragment : Fragment() {
         _binding = FragmentEditTeamsBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
 
-        viewAdapter = EditTeamsRecyclerViewAdapter(sharedVm.teams)
+        viewAdapter = EditTeamsRecyclerViewAdapter(requireContext(), sharedVm.teams)
         sharedVm.teams.observe(viewLifecycleOwner, Observer {
             viewAdapter.onDatasetChange()
         })

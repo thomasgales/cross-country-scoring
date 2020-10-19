@@ -1,23 +1,27 @@
 package com.example.crosscountryscoring.deleteteams
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.example.crosscountryscoring.R
 import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.databinding.DeleteTeamViewBinding
+import kotlinx.coroutines.withContext
 
 enum class DeleteState {
     KEEP, DELETE
 }
 
-class DeleteTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<TeamViewModel>>)
+class DeleteTeamsRecyclerViewAdapter(private val context: Context,
+                                     private val databaseTeams: LiveData<List<TeamViewModel>>)
     : RecyclerView.Adapter<DeleteTeamViewHolder>(), TeamDeleteStateChangeListener {
 
     private var myTeams: MutableList<Pair<Team, DeleteState>> = databaseTeams.value?.map {
-        Pair(it.teamWithRunners.team, DeleteState.KEEP)
-    }?.toMutableList() ?: mutableListOf()
+        Pair(it.team.value ?: Team(context.getString(R.string.invalid_team_name_placeholder)), DeleteState.KEEP)
+    }?.toMutableList() ?: mutableListOf<Pair<Team, DeleteState>>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeleteTeamViewHolder {
         val layoutInflater: LayoutInflater = LayoutInflater.from(parent.context)
@@ -39,7 +43,7 @@ class DeleteTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<Te
 
     fun onDatasetChange() {
         myTeams = databaseTeams.value?.map {
-            Pair(it.teamWithRunners.team, DeleteState.KEEP)
+            Pair(it.team.value ?: Team(context.getString(R.string.invalid_team_name_placeholder)), DeleteState.KEEP)
         }?.toMutableList() ?: mutableListOf()
         notifyDataSetChanged()
     }

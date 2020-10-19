@@ -21,7 +21,7 @@ class EditTeamsViewModel(private val sharedVm : SharedTeamsViewModel) : ViewMode
                 // changed. However, this simplifies the code greatly. This app is not intended
                 // or well suited to be used for more than ~5 teams anyway. See README for details.
                 else if (team.second == ChangeState.EXISTED) {
-                    sharedVm.teamsDao.updateTeam(team.first)
+                    sharedVm.teamsDao.updateTeamName(team.first.teamId, team.first.name)
                 }
             }
             sharedVm.updateListOfTeams()
