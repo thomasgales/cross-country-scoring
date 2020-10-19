@@ -19,6 +19,10 @@ class TeamsDaoStub : ITeamsDao {
         TODO("Not yet implemented")
     }
 
+    override fun deleteRunner(runner: Runner) {
+        TODO("Not yet implemented")
+    }
+
     override fun getTeam(teamId: Long): Team {
         // savedTeams[teamId] will return null if key not found. This is how Room database will act.
         return savedTeams[teamId] ?: Team(
@@ -26,10 +30,17 @@ class TeamsDaoStub : ITeamsDao {
         )
     }
 
-    override fun updateTeam(team: Team) {
+    override fun updateTeamName(teamId: Long, newName: String) {
         // Check if teamId already exists in savedTeams. We only want to update, not add.
-        if (savedTeams[team.teamId] != null) {
-            savedTeams[team.teamId] = team
+        if (savedTeams[teamId] != null) {
+            savedTeams[teamId]?.name = newName
+        }
+    }
+
+    override fun updateTeamScore(teamId: Long, newScore: Int) {
+        // Check if teamId already exists in savedTeams. We only want to update, not add.
+        if (savedTeams[teamId] != null) {
+            savedTeams[teamId]?.score = newScore
         }
     }
 }

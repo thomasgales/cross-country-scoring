@@ -1,8 +1,8 @@
 package com.example.crosscountryscoring
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.crosscountryscoring.database.Runner
 import com.example.crosscountryscoring.database.Team
-import com.example.crosscountryscoring.database.TeamWithRunners
 import com.example.crosscountryscoring.database.TeamsDaoStub
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -13,23 +13,23 @@ class TeamViewModelUnitTests {
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var penn: TeamWithRunners
+    private lateinit var penn: Team
+    private val pennRunners = mutableListOf<Runner>()
     private lateinit var daoStub: TeamsDaoStub
     private lateinit var vm: TeamViewModel
 
     @Before
     fun setup() {
-        val team = Team("Penn")
-        penn = TeamWithRunners(team, mutableListOf())
+        penn = Team("Penn")
         daoStub = TeamsDaoStub()
-        vm = TeamViewModel(penn, daoStub)
+        vm = TeamViewModel(penn, pennRunners, daoStub)
     }
 
     @Test
     fun runnerFinished_TeamScoreIncreases() {
         vm.runnerFinished(5)
         vm.runnerFinished(6)
-        assertEquals(11, penn.team.score)
+        assertEquals(11, penn.score)
     }
 
     @Test
@@ -42,7 +42,7 @@ class TeamViewModelUnitTests {
         vm.runnerFinished(6)
         vm.runnerFinished(7)
         vm.runnerFinished(8)
-        assertEquals(15, penn.team.score)
+        assertEquals(15, penn.score)
     }
 
     @Test
@@ -70,6 +70,16 @@ class TeamViewModelUnitTests {
         vm.runnerFinished(2)
         vm.clearScore()
         assertEquals(true, vm.getFinishers().isEmpty())
-        assertEquals(0, vm.teamWithRunners.team.score)
+        assertEquals(0, vm.team.value?.score)
+    }
+
+    @Test
+    fun undoFinisher_ReducesScoreAndRemovesFinisher() {
+        vm.runnerFinished(5)
+        vm.runnerFinished(6)
+        vm.undoRunnerFinished()
+        assertEquals(5, vm.team.value?.score)
+        assertEquals(1, vm.getFinishers().size)
+        assertEquals(5, vm.getFinishers()[0].place)
     }
 }

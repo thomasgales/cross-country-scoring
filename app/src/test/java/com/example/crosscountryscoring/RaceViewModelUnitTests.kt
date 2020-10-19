@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import com.example.crosscountryscoring.database.Race
 import com.example.crosscountryscoring.database.RacesDao
+import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.scoring.RaceViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -34,7 +35,7 @@ class RaceViewModelUnitTests {
     fun teamClick_IncrementsRunner() {
         `when` (mockTeamVm.runnerFinished(1)).thenReturn(true)
         val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
-        val race = Race("Penn")
+        val race = Race("PennInvite")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns true, race should iterate current finisher
@@ -46,7 +47,7 @@ class RaceViewModelUnitTests {
         // The 1st runner would always return true- but, to make testing quicker we'll return false.
         `when` (mockTeamVm.runnerFinished(1)).thenReturn(false)
         val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
-        val race = Race("Penn")
+        val race = Race("PennInvite")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.onTeamClicked(mockTeamVm)
         // When teamVm returns false, race should NOT iterate current finisher
@@ -56,7 +57,7 @@ class RaceViewModelUnitTests {
     @Test
     fun resetRace_ClearsRace() {
         val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
-        val race = Race("Penn")
+        val race = Race("PennInvite")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.onTeamClicked(mockTeamVm)
         vm.resetRace()
@@ -67,7 +68,7 @@ class RaceViewModelUnitTests {
     @Test
     fun startRace_CausesRaceRunningTrue() {
         val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
-        val race = Race("Penn")
+        val race = Race("PennInvite")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.startRace()
         assertEquals(true, vm.raceRunning.value)
@@ -76,10 +77,23 @@ class RaceViewModelUnitTests {
     @Test
     fun endRace_CausesRaceRunningFalse() {
         val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
-        val race = Race("Penn")
+        val race = Race("PennInvite")
         val vm = RaceViewModel(race, teams, mockRacesDao)
         vm.startRace()
         vm.endRace()
         assertEquals(false, vm.raceRunning.value)
+    }
+
+    @Test
+    fun undoFinisher_ReducesNumberOfFinishers() {
+        `when` (mockTeamVm.runnerFinished(1)).thenReturn(true)
+        `when` (mockTeamVm.team).thenReturn(MutableLiveData(Team("Penn")))
+        val teams = MutableLiveData<List<ITeamViewModel>>(listOf(mockTeamVm))
+        val race = Race("PennInvite")
+        val vm = RaceViewModel(race, teams, mockRacesDao)
+        vm.onTeamClicked(mockTeamVm)
+        vm.onTeamClicked(mockTeamVm)
+        vm.undoRunnerFinished()
+        assertEquals(1, vm.race.value!!.numberFinishedRunners)
     }
 }

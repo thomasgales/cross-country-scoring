@@ -74,7 +74,7 @@ class DeleteTeamsFragment : Fragment() {
 
         viewManager = LinearLayoutManager(activity)
 
-        viewAdapter = DeleteTeamsRecyclerViewAdapter(sharedVm.teams)
+        viewAdapter = DeleteTeamsRecyclerViewAdapter(requireContext(), sharedVm.teams)
         sharedVm.teams.observe(viewLifecycleOwner, Observer {
             viewAdapter.onDatasetChange()
         })
