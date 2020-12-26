@@ -1,9 +1,11 @@
 package com.example.crosscountryscoring.editteams
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.example.crosscountryscoring.R
 import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.TeamViewModel
 import com.example.crosscountryscoring.databinding.EditTeamViewBinding
@@ -17,11 +19,12 @@ enum class ChangeState {
  * snapshot of the current teams as a MutableList. The user is then free to make changes and save
  * the changes to the database when finished.
  */
-class EditTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<TeamViewModel>>)
+class EditTeamsRecyclerViewAdapter(private val context: Context,
+                                   private val databaseTeams: LiveData<List<TeamViewModel>>)
     : RecyclerView.Adapter<EditTeamViewHolder>() {
 
     private var myTeams: MutableList<Pair<Team, ChangeState>> = databaseTeams.value?.map {
-        Pair(it.teamWithRunners.team, ChangeState.EXISTED)
+        Pair(it.team.value ?: Team(context.getString(R.string.invalid_team_name_placeholder)), ChangeState.EXISTED)
     }?.toMutableList() ?: mutableListOf()
 
     private var newestItemPosition = -1
@@ -38,7 +41,7 @@ class EditTeamsRecyclerViewAdapter(private val databaseTeams: LiveData<List<Team
 
     fun onDatasetChange() {
         myTeams = databaseTeams.value?.map {
-            Pair(it.teamWithRunners.team, ChangeState.EXISTED)
+            Pair(it.team.value ?: Team(context.getString(R.string.invalid_team_name_placeholder)), ChangeState.EXISTED)
         }?.toMutableList() ?: mutableListOf()
         notifyDataSetChanged()
     }

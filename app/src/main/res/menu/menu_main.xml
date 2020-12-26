@@ -8,11 +8,16 @@
         android:icon="@drawable/baseline_create_24"
         app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/undo_finisher_button"
+        android:title="@string/undo_finisher"
+        android:icon="@drawable/ic_baseline_undo_24"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/end_race_button"
         android:title="@string/end_race"
         app:showAsAction="never"/>
     <item
         android:id="@+id/reset_race_button"
         android:title="@string/reset_race"
-        app:showAsAction="never"/>
+        app:showAsAction="collapseActionView"/>
 </menu>

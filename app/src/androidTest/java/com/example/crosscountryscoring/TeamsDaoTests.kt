@@ -36,7 +36,8 @@ class TeamsDaoTests {
 
     /**
      * Tests the ability to add a runner to the database and associate it with a team. Ensures
-     * the runner's place is correct and retrievable from database.
+     * the runner's place is correct and retrievable from database. Ensures runners are returned
+     * in ascending order by place (lowest place runner is first in list).
      */
     @Test
     @Throws(Exception::class)
@@ -47,9 +48,8 @@ class TeamsDaoTests {
         val runner2 = Runner(4, teamId)
         teamsDao.addRunner(runner1)
         teamsDao.addRunner(runner2)
-        val dbTeamWithRunners = teamsDao.getRunners(teamId)
-        assertTrue(dbTeamWithRunners.runners[0].place == 3 || dbTeamWithRunners.runners[0].place == 4)
-        assertTrue(dbTeamWithRunners.runners[1].place == 3 || dbTeamWithRunners.runners[1].place == 4)
+        val dbRunners = teamsDao.getRunners(teamId)
+        assertTrue(dbRunners[0].place == 3 && dbRunners[1].place == 4)
     }
 
     @Test
@@ -60,8 +60,8 @@ class TeamsDaoTests {
         val runner1 = Runner(3, teamId)
         teamsDao.addRunner(runner1)
         teamsDao.clearRunners()
-        val dbTeamWithRunners = teamsDao.getRunners(teamId)
-        assertTrue(dbTeamWithRunners.runners.isEmpty())
+        val dbRunners = teamsDao.getRunners(teamId)
+        assertTrue(dbRunners.isEmpty())
     }
 
     /**
@@ -74,7 +74,7 @@ class TeamsDaoTests {
         for (team in teams) {
             teamsDao.addTeam(team)
         }
-        teamsDao.deleteTeams()
+        teamsDao.clearTeams()
         val dbTeams = teamsDao.getAllTeams()
         assertTrue(dbTeams.isEmpty())
     }
@@ -113,7 +113,7 @@ class TeamsDaoTests {
         val teamToChange = Team("Riley")
         val teamId = teamsDao.addTeam(teamToChange)
         teamToChange.score = 44
-        teamsDao.updateTeam(teamToChange)
+        teamsDao.updateTeamScore(teamToChange.teamId, teamToChange.score)
         val dbTeam = teamsDao.getTeam(teamId)
         assertEquals(teamToChange, dbTeam)
     }

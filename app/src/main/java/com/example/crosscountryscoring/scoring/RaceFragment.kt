@@ -7,6 +7,8 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.internal.view.SupportMenuItem.SHOW_AS_ACTION_ALWAYS
+import androidx.core.internal.view.SupportMenuItem.SHOW_AS_ACTION_NEVER
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.*
@@ -35,8 +37,8 @@ class RaceFragment : Fragment(), View.OnClickListener {
     private var mBound = false
 
     private var _binding: FragmentRaceBinding? = null
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+
+    private var previousUndoAvailable = false
 
     /** Defines callbacks for service binding, passed to bindService()  */
     private val connection = object : ServiceConnection {
@@ -70,8 +72,8 @@ class RaceFragment : Fragment(), View.OnClickListener {
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
-                setPositiveButton(positiveOption, DialogInterface.OnClickListener { _, _ -> positiveCallback()})
-                setNegativeButton(negativeOption, DialogInterface.OnClickListener { _, _ -> negativeCallback()})
+                setPositiveButton(positiveOption) { _, _ -> positiveCallback() }
+                setNegativeButton(negativeOption) { _, _ -> negativeCallback() }
             }
             builder.setMessage(message)
             builder.create()
@@ -80,9 +82,9 @@ class RaceFragment : Fragment(), View.OnClickListener {
     }
 
     /**
-     * Ends the race. Clears all scores and finishers.
+     * Ends the race. Does NOT clear all scores and finishers.
      */
-    private fun endRace() {
+    private fun endRace(showRaceEndedToast: Boolean) {
         Intent(activity, CrossCountryRaceTimerService::class.java).also {
             activity?.unbindService(connection)
         }
@@ -90,20 +92,36 @@ class RaceFragment : Fragment(), View.OnClickListener {
             activity?.stopService(intent)
             // Putting toast here instead of in service to avoid inadvertently showing toast if
             //  service gets destroyed before ever being started
-            Toast.makeText(activity, "Race ended", Toast.LENGTH_SHORT).show()
+            if (showRaceEndedToast) {
+                Toast.makeText(activity, "Race ended", Toast.LENGTH_SHORT).show()
+            }
         }
         viewModel.endRace()
         Intent(activity, CrossCountryRaceTimerService::class.java).also { intent ->
             activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
-        viewAdapter.onDatasetChange()
+        activity?.invalidateOptionsMenu()
     }
 
+    /**
+     * Returns the number of seconds that have elapsed since the race was last started.
+     */
     private fun getSecondsElapsed() : LiveData<Long> {
         return if (mBound) {
             timerService.totalSecondsElapsed
         } else {
             MutableLiveData(0L)
+        }
+    }
+
+    /**
+     * Should be called whenever the number of finished runners has changed. Decides if options menu
+     *  needs to be updated.
+     */
+    private fun numberFinishedRunnersChanged() {
+        if (viewModel.undoAvailable.value != previousUndoAvailable) {
+            activity?.invalidateOptionsMenu()
+            previousUndoAvailable = viewModel.undoAvailable.value ?: false
         }
     }
 
@@ -143,9 +161,13 @@ class RaceFragment : Fragment(), View.OnClickListener {
         _binding?.timeElapsed = getSecondsElapsed()
 
         viewManager = LinearLayoutManager(activity)
-        viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, this)
+        viewAdapter = RaceRecyclerViewAdapter(sharedVm.teams, viewModel, viewLifecycleOwner)
         sharedVm.teams.observe(viewLifecycleOwner, Observer {
             viewAdapter.onDatasetChange()
+        })
+
+        viewModel.undoAvailable.observe(viewLifecycleOwner, Observer {
+            numberFinishedRunnersChanged()
         })
 
         recyclerView = _binding!!.raceRecyclerView.apply {
@@ -179,7 +201,13 @@ class RaceFragment : Fragment(), View.OnClickListener {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         menu.findItem(R.id.end_race_button).isVisible = viewModel.raceRunning.value ?: true
-        menu.findItem(R.id.reset_race_button).isVisible = (viewModel.raceRunning.value == false)
+        if (viewModel.raceRunning.value == true) {
+            menu.findItem(R.id.edit_race_button).setShowAsAction(SHOW_AS_ACTION_NEVER)
+        }
+        else {
+            menu.findItem(R.id.edit_race_button).setShowAsAction(SHOW_AS_ACTION_ALWAYS)
+        }
+        menu.findItem(R.id.undo_finisher_button).isVisible = viewModel.undoAvailable.value ?: false
         super.onPrepareOptionsMenu(menu)
     }
 
@@ -195,7 +223,7 @@ class RaceFragment : Fragment(), View.OnClickListener {
                 // Ask if we should stop the race
                 askForConfirmation(getString(R.string.confirm_race_end),
                     "End Race",
-                    ::endRace,
+                    {endRace(true)},
                     "Cancel",
                     {})
                 true
@@ -205,8 +233,19 @@ class RaceFragment : Fragment(), View.OnClickListener {
                 askForConfirmation(getString(R.string.confirm_race_reset),
                     "Reset Race",
                     ::resetRace,
-                    "Cancel",
-                    {})
+                    "Cancel"
+                ) {}
+                true
+            }
+            R.id.undo_finisher_button -> {
+                val undoResult = viewModel.undoRunnerFinished()
+                if (undoResult.undoPerformed) {
+                    Toast.makeText(activity,
+                        getString(R.string.undo_finisher_toast, undoResult.teamPerformedOn),
+                        Toast.LENGTH_SHORT)
+                        .show()
+                }
+                viewAdapter.onDatasetChange()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -243,10 +282,12 @@ class RaceFragment : Fragment(), View.OnClickListener {
     }
 
     /**
-     * For now this has mostly the same effect as ending the race.
+     * Ends and resets the race.
      */
     private fun resetRace() {
-        viewModel.endRace()
+        endRace(false)
+        viewModel.resetRace()
+        Toast.makeText(activity, "Race reset", Toast.LENGTH_SHORT).show()
         viewAdapter.onDatasetChange()
     }
 

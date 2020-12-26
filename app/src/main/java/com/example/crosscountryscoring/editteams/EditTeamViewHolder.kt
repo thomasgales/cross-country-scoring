@@ -1,7 +1,5 @@
 package com.example.crosscountryscoring.editteams
 
-import android.content.Context
-import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.crosscountryscoring.database.Team
 import com.example.crosscountryscoring.databinding.EditTeamViewBinding
