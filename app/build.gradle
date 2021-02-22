@@ -9,11 +9,13 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.example.crosscountryscoring"
+        // Weird applicationId, but that's what 17 year old me used for the original app...
+        // Google does not let you change it
+        applicationId "appinventor.ai_tom9189.CrossCountry_ChangeNames"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "2.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
