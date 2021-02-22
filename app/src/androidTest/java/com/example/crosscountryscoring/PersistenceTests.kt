@@ -48,7 +48,7 @@ class PersistenceTests {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        Assert.assertEquals("com.example.crosscountryscoring", appContext.packageName)
+        Assert.assertEquals("appinventor.ai_tom9189.CrossCountry_ChangeNames", appContext.packageName)
     }
 
     @Test
