@@ -2,10 +2,6 @@
 
 This Android app is designed to help score a cross country meet. While many large meets have automatic chip timing, smaller meets still sometimes rely on manual methods. Spectators may also want to use this app to get faster results at chip-timed meets.
 
-# How to Install
-
-Cross Country Scoring is available on the Google Play store [here](https://play.google.com/store/apps/developer?id=Thomas+Gales). Alternatively, the source code can be compiled in Android Studio and installed to your Android device.
-
 # Release Notes
 
 **2.1.0**
